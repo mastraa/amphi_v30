@@ -3,6 +3,7 @@
 import sys, serial
 from PyQt4 import QtCore, QtGui, uic
 import time
+import struct
 
 sys.path.append('libreria')
 
@@ -20,6 +21,11 @@ class MainWindow(QtGui.QMainWindow):
 		global baudList, gui
 		self.connStat = 0
 		self.device = 0 #device to connect
+		self.interval=1000 #millis
+
+		self.timer=QtCore.QTimer(self)
+		self.timer.timeout.connect(self.timerFunctions)
+		self.timer.start(self.interval)
 
 		self.guiSetting()
 		self.buttonFunction()
@@ -48,15 +54,29 @@ class MainWindow(QtGui.QMainWindow):
 	def Connection(self):
 		self.connStat = not self.connStat
 		if self.connStat:
+			self.ui.connectionInfo.appendPlainText(time.strftime("Waiting For Connection..."))			time.sleep(1)
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
-			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: connection to ")+ port +" "+baud)
+			time.sleep(2) #need to received first data, otherwise we have an error with conversion data
+			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: connect to ")+ port +" "+baud)
 			self.ui.ConnectionButton.setText("Disconnect")
+			
 		else:
-			self.close()
+			self.device.close()
+			self.device=0
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
+
+	def timerFunctions(self):
+		if self.device:
+			data = comLib.readIncomeByte(self.device)
+			self.ui.receivedText.appendPlainText(str(type(data)))
+			#val = comLib.byteToFloat(data[1:])
+			#val=[]
+			#val = [data[4], data[3], data[2], data[1]]
+			#b = ''.join(chr(i) for i in val)
+			#self.ui.receivedText.appendPlainText(str(struct.unpack('>f', b)))
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()
