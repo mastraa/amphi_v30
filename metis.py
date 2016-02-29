@@ -7,7 +7,7 @@ import struct
 
 sys.path.append('libreria')
 
-import comLib
+import comLib, mvpl
 
 #global definition
 gui = "gui/MainGui.ui"
@@ -22,7 +22,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.connStat = 0
 		self.device = 0 #device to connect
 		self.interval=1000 #millis
-
+		self.time=time.strftime("%H:%m:%S")
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
 		self.timer.start(self.interval)
@@ -45,7 +45,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def SerialCheck(self):
 		self.ui.DeviceList.clear()
-		self.ui.DeviceList.addItems(comLib.checkSerialDevice()[1:])#first one is bluetooth device
+		self.ui.DeviceList.addItems(comLib.checkSerialDevice())
 
 	def addBaud(self):
 		self.ui.BaudList.addItem(self.ui.persBaud.text())
@@ -54,7 +54,7 @@ class MainWindow(QtGui.QMainWindow):
 	def Connection(self):
 		self.connStat = not self.connStat
 		if self.connStat:
-			self.ui.connectionInfo.appendPlainText(time.strftime("Waiting For Connection..."))			time.sleep(1)
+			self.ui.connectionInfo.appendPlainText(time.strftime("Waiting For Connection..."))
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
@@ -69,14 +69,11 @@ class MainWindow(QtGui.QMainWindow):
 			self.ui.ConnectionButton.setText("Connect")
 
 	def timerFunctions(self):
+		self.time=time.strftime("%H:%m:%S")
 		if self.device:
 			data = comLib.readIncomeByte(self.device)
-			self.ui.receivedText.appendPlainText(str(type(data)))
-			#val = comLib.byteToFloat(data[1:])
-			#val=[]
-			#val = [data[4], data[3], data[2], data[1]]
-			#b = ''.join(chr(i) for i in val)
-			#self.ui.receivedText.appendPlainText(str(struct.unpack('>f', b)))
+			result=mvpl.decodeNMEA(data)
+			self.ui.receivedText.appendPlainText(self.time+": "+str(result))
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()

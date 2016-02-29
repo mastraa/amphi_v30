@@ -1,5 +1,5 @@
 
-float temp = -11.75;   
+float temp[6];
 byte * b = (byte *) &temp;
 
 byte buf[4];
@@ -10,6 +10,12 @@ void setup() {
   // put your setup code here, to run once:
 Serial.begin(9600);
 pinMode(13, OUTPUT);
+temp[0]=-11.75;
+temp[1]=10.40;
+temp[2]=89.10;
+temp[3]=-10.00;
+temp[4]=11.45;
+
 }
 
 void loop() {
@@ -17,7 +23,7 @@ void loop() {
   //Serial.write(array,4);
   //Serial.write(buf,4);
   //Serial.write('\n');
-  sendCommand(10, b, 4, '$', '\n'); 
+  sendCommand(10, b, 20, '$', '\n'); 
   delay(1000);
   byte i = 0;
   while(Serial.available()&&i<4){

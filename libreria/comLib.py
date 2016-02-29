@@ -36,6 +36,8 @@ def checkSerialDevice():
             result.append(port)
         except (OSError, serial.SerialException):
             pass
+    if sys.platform.startswith('darwin'):
+        result = result[1:] #first one is bluetooth device
     return result
 
 def readIncomeByte(device, starter = '$', ender = '*'):
@@ -72,3 +74,11 @@ def byteToFloat(array):
     b = ''.join(chr(i) for i in val)
     return struct.unpack('>f', b)
 
+def splitIncomeData(data, init):
+    result=[]
+    i=0
+    while i<len(init)-1:
+        result.append(data[init[i]:init[i+1]])
+        i=i+1
+    result.append(data[init[i]:])
+    return result
