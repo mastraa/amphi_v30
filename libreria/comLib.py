@@ -1,5 +1,6 @@
 """
-comLib.py v1.0
+comLib.py v1.
+communication library
 libreria comunicazione seriale
 
 Andrea Mastrangelo
@@ -54,11 +55,11 @@ def readIncomeByte(device, starter = '$', ender = '*'):
                 device.read()#clean \n byte
                 return data
             else:
-                return "Checksum error"
+                return 2 #checksum error
         else:
-            return 1
+            return 1 #no starter
     else:
-        return 0
+        return 0 #no data
 
 def sendByte(device, array, starter = '$', ender = '*'):
     _xor = 0
@@ -69,10 +70,14 @@ def sendByte(device, array, starter = '$', ender = '*'):
     device.write(chr(_xor))
     device.write('\n')
 
-def byteToFloat(array):
-    val = [array[3], array[2], array[1], array[0]]
-    b = ''.join(chr(i) for i in val)
+def byteToFloat(array):#convert four bytes array to a float value
+    array.reverse()
+    b = ''.join(chr(i) for i in array)
     return struct.unpack('>f', b)
+
+def byteToData(f,array):#convert four bytes array to a variable typed by f
+    b = ''.join(chr(i) for i in array)
+    return struct.unpack('>'+f, b)
 
 def splitIncomeData(data, init):
     result=[]

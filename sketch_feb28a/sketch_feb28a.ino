@@ -1,41 +1,75 @@
+struct Mvicb_t { //NMEA: Mètis Vela Infusion Check Byte
+  byte tipo;
+  unsigned long times;
+  float ext_t, ext_u, inl_t, oul_t, ins_t;
+};
 
-float temp[6];
-byte * b = (byte *) &temp;
+struct Mvupcb_t //NMEA: Mètis Vela UniPd Corta Byte
+{
+    byte tipo;
+    long lat,lon;
+    unsigned long gradi, date, times;
+    float vel, attitude[3];
+};
 
-struct mvic { 
-byte tipo;
-float ext_t;
-float ext_u;
-float inl_t;
-float oul_t;
-float ins_t;
-}; 
+struct Mvupb_t //NMEA: Mètis Vela UniPd Byte
+{
+    byte tipo;
+    long lat,lon;
+    unsigned long gradi, date, times;
+    float vel, attitude[3], tempDS, left, right;
+    byte Wspeed, vale_1, vale_2;
+    };
 
-typedef struct mvic t_mvic;
+typedef struct Mvicb_t Mvic;
+typedef struct Mvupb_t Mvup;
+typedef struct Mvupcb_t Mvupc;
 
-t_mvic Mvic;
+Mvic mvic;
+Mvup mvup;
 
-byte * c = (byte *) &Mvic;
+byte * c = (byte *) &mvup;
+byte * b = (byte *) &mvic;
 
 
 
 void setup() {
   Serial.begin(9600);
+  //Serial.println(sizeof(Mvupb_t));
   pinMode(13, OUTPUT);
-  temp[0]=-11.75;
-  temp[1]=10.40;
-  temp[2]=89.10;
-  temp[3]=-10.00;
-  temp[4]=11.45;
+  mvup.tipo=7;
+  mvup.lat=1111543456;
+  mvup.lon=2111543457;
+  mvup.gradi=10666;
+  mvup.date=2111543438;
+  mvup.times=millis();
+  mvup.vel=10.49;
+  mvup.attitude[0]=17.65;
+  mvup.attitude[1]=95.65;
+  mvup.attitude[2]=110.76;
+  mvup.tempDS=26.51;
+  mvup.left=56.12;
+  mvup.right=65.78;
+  mvup.Wspeed=10;
+  mvup.vale_1=1;
+  mvup.vale_2=245;
+
+  
+  mvic.tipo=10;
+  mvic.times=millis();
+  mvic.ext_t=-11.75;
+  mvic.ext_u=10.40;
+  mvic.inl_t=89.10;
+  mvic.oul_t=-10.00;
+  mvic.ins_t=11.45;
 }
 
 void loop() {
-  //Serial.write(prova);
-  //Serial.write(array,4);
-  //Serial.write(buf,4);
-  //Serial.write('\n');
-  sendCommand(10, b, 20, '$', '\n');
-  sendStruct(c, sizeof(mvic), '$', '\n'); 
+  Serial.write(5);
+  mvup.times=millis();
+  mvic.times=millis();
+  sendStruct(c, sizeof(Mvupb_t), '$', '\n');
+  //sendStruct(b, sizeof(Mvicb_t), '$', '\n');
   delay(1000);
 }
 
@@ -43,13 +77,11 @@ void loop() {
 void sendStruct(byte* commands, byte len, byte starter, byte ender){//send command
   byte _XOR;
   Serial.write(starter);
-  Serial.write(type);
-  //Serial.print(",");//separatore, per i byte non  serve
   for (byte i=0; i<len; ++i){
     Serial.write(commands[i]);
   }
   Serial.write('*');
-  _XOR = type^getCheckSum(commands, len);
+  _XOR = getCheckSum(commands, len);
   Serial.write(_XOR);
   Serial.write(ender);
 }
