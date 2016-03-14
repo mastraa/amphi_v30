@@ -10,15 +10,15 @@ import comLib, struct
 
 NMEA={};
 NMEA['MVIC']=[0,1,5,9,13,17]
-NMEA[10]=['b','l','f','f','f','f','f']#MVIC
-NMEA[7]=['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b']#MVUP
-NMEA[8]=['b','l','l','L','L','L','f','f','f','f']#MVUPC
+NMEA[10]=[['b','l','f','f','f','f','f'],[]]#MVIC
+NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','prova']]#MVUP
+NMEA[8]=[['b','l','l','L','L','L','f','f','f','f'],[]]#MVUPC
 
 def decodeNMEA(data):
 	val=[]
 	byteT=data[0]
 	n=0
-	for i in NMEA[byteT]:
+	for i in NMEA[byteT][0]:
 		if i =='b':
 			l=1
 			val.append(data[n])
@@ -38,3 +38,6 @@ def decodeNMEA(data):
 				val[-1]=float("%.3f"%val[-1])
 		n=n+l
 	return val
+
+
+

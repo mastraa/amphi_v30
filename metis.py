@@ -19,7 +19,29 @@ import comLib, mvpl
 
 #global definition
 gui = "gui/MainGui.ui"
+#saveDialogGui="gui/saveDialog.ui"
+saveDialogGui="gui/widget.ui"
 baudValues=["9600","57600","115200"]
+
+class SaveDialog(QtGui.QWidget):
+	def __init__(self, data, parent=None):
+		QtGui.QDialog.__init__(self, parent)
+		self.ui=uic.loadUi(saveDialogGui)#load gui
+		self.ui.saveBox.accepted.connect(lambda: self.accept(data))
+		self.ui.saveBox.rejected.connect(self.reject)
+		self.ui.show()
+
+	def accept(self, data):
+		file = open ("fileStore/"+"data"+".txt","w")
+		for item in data:
+			for i in item:
+				file.write(str(i)+",")
+			file.write("\n")
+		file.close()
+		self.ui.close()
+
+	def reject(self):
+		self.ui.close()
 
 class MainWindow(QtGui.QMainWindow):
 	def __init__(self):
@@ -29,7 +51,7 @@ class MainWindow(QtGui.QMainWindow):
 		global baudList, gui
 		self.connStat = 0
 		self.device = 0 #device to connect
-		self.interval=300 #millis
+		self.interval=500 #millis
 		self.time=time.strftime("%H:%m:%S")
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
@@ -67,6 +89,7 @@ class MainWindow(QtGui.QMainWindow):
 	def Connection(self):
 		self.connStat = not self.connStat
 		if self.connStat:
+			self.data=[]
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
@@ -77,15 +100,17 @@ class MainWindow(QtGui.QMainWindow):
 			self.device=0
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
+			dialog = SaveDialog(parent=self, data=self.data)
 
 	def timerFunctions(self):
 		self.time=time.strftime("%H:%m:%S")
 		if self.device:
-			data = comLib.readIncomeByte(self.device)
-			if not isinstance(data, int):
-				result=mvpl.decodeNMEA(data)
-				self.ui.receivedText.appendPlainText(self.time+": "+str(result))
-				self.graphicPlot()
+			income = comLib.readIncomeByte(self.device)
+			if not isinstance(income, int):
+				result=mvpl.decodeNMEA(income)
+				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
+				self.data.append(result)
+				#self.graphicPlot()
 
 	def graphicPlot(self):
 		self.fig_Inlet.clf()
