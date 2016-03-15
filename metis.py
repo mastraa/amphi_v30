@@ -80,18 +80,18 @@ class MainWindow(QtGui.QMainWindow):
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
-			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: connect to ")+ port +" "+baud)
+			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: connect to ")+ port +" "+baud)
 			self.ui.ConnectionButton.setText("Disconnect")
 		else:
 			self.device.close()
 			self.device=0
-			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: disconnected"))
+			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
 			self.infoSave()
 			self.data.clear()#clear store data dict
 
 	def timerFunctions(self):
-		self.time=time.strftime("%H:%m:%S")
+		self.time=time.strftime("%H:%M:%S")
 		if self.device:
 			income = comLib.readIncomeByte(self.device)
 			if not isinstance(income, int):
@@ -112,8 +112,8 @@ class MainWindow(QtGui.QMainWindow):
 
 	def saveData(self, i):
 		if i.text()=="OK":
-			pathFile=path+"/fileStore/"+time.strftime("%y%m%d%H%m")+".txt"
-			fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', pathFile, selectedFilter='*.txt')
+			pathFile=path+"/fileStore/"+time.strftime("%y%m%d%H%M")+".csv"
+			fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', pathFile, selectedFilter='*.csv')
 			if fileName:
 				mvpl.Save(fileName, self.data)
 

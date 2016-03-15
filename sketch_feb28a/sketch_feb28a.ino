@@ -65,9 +65,10 @@ void setup() {
 }
 
 void loop() {
-  mvup.attitude[0]=randNum();
-  mvup.attitude[1]=randNum();
-  mvup.attitude[2]=randNum();
+  mvup.attitude[0]=randNum(0,25);
+  mvup.attitude[1]=randNum(0,10);
+  mvup.attitude[2]=randNum(0,360);
+  mvup.gradi=randNum(0,360);
   mvup.times=millis();
   //mvic.times=millis();
   sendStruct(c, sizeof(Mvupb_t), '$', '\n');
@@ -119,10 +120,13 @@ uint8_t getCheckSum(byte *buff, int l){//checksum for byte type
     return XOR;
 }
 
-float randNum(){
-  float num=(float)(rand()/100+5);
-  if (num>360){
-   num=num-(num-360+50.43);
+float randNum(int minN,int maxN){
+  float num=(float)(rand()/1000+5);
+  while (num>maxN){
+   num=num-(num-maxN+0.43);
+  }
+  while (num<minN){
+    num=num+(minN-num+0.36);
   }
   return num; 
 

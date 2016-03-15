@@ -6,7 +6,7 @@ Metis Vela Python Library
 29/02/16
 Andrea Mastrangelo
 """
-import comLib, struct, time
+import comLib, struct, time, csv
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 
@@ -52,40 +52,53 @@ def storeData(buff, result):#for every iteration store last income data string i
 	i=1
 	tipo=result[0]
 	while i < len(NMEA[tipo][1]):
-		buff[NMEA[tipo][1][i]].append(result[i])
+		if NMEA[tipo][1][i]=='times':
+			buff[NMEA[tipo][1][i]].append(result[i]/1000)
+		else:
+			buff[NMEA[tipo][1][i]].append(result[i])
 		i=i+1
 
 def plot(data, figure):
-	if data[0][0]==7:
+	if data['tipo']==7:
 		figura=figure['telemetria'][0]
 		canvas=figure['telemetria'][1]
-		roll, pitch, yaw, time, scarroccio=[],[],[],[],[]
+		roll, pitch, yaw, time, gradi=data['roll'],data['pitch'],data['yaw'],data['times'], data['gradi']
+		scarroccio=[]
+		for i in range(len(yaw)):
+			scarroccio.append(gradi[i]-yaw[i])
 		figura.clf()
-		for i in data[-25:]:
-			roll.append(i[7])
-			pitch.append(i[8])
-			yaw.append(i[9])
-			time.append(i[5]/1000)
-			scarroccio.append(i[9])
 
 		plot_1=figura.add_subplot(211)
-		plot_1.plot(time,roll)
-		plot_1.plot(time,pitch)
-		plot_1.plot(time,yaw)
+		plot_1.plot(time[-25:],roll[-25:], label="roll")
+		plot_1.plot(time[-25:],pitch[-25:], label="pitch")
+		plot_1.plot(time[-25:],yaw[-25:], label="yaw")
+		plot_1.legend(loc="upper right")
+		plot_1.grid()
 
 		plot_2=figura.add_subplot(212)
+		plot_2.plot(time[-25:], scarroccio[-25:], label="scarr")
+		plot_2.legend(loc="upper right")
+		plot_2.set_xlabel('time[s]')
+		plot_2.grid()
 
 
 		canvas.draw()
 
 def Save(filename, data):
-	file = open (filename,"w")
-	file.write(time.strftime("%d/%m/%y %H:%m:%S"))
-	print data.keys()
-	#for i in NMEA[strtipo][1]:
-		#if not i=='tipo':
-			#file.write(str(i)+": ")
-			#file.write(str(data[i]))
-			#file.write("\n")
+	file = open(filename, 'wb')
+	head=NMEA[data['tipo']][1]
+	for item in head:
+		file.write(item+',')
+	file.write('\n')
+	for i in range(len(data['times'])):
+		for item in head:
+			if item=='tipo':
+				file.write(str(data[item]))
+			else:
+				file.write(str(data[item][i]))
+			file.write(',')
+		file.write('\n')
 	file.close()
+
+	
 
