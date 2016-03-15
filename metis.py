@@ -87,7 +87,7 @@ class MainWindow(QtGui.QMainWindow):
 			self.device=0
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%m:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
-			self.saveData()
+			self.infoSave()
 			self.data.clear()#clear store data dict
 
 	def timerFunctions(self):
@@ -100,14 +100,22 @@ class MainWindow(QtGui.QMainWindow):
 				if len(self.data)==0:
 					self.data=mvpl.createDataStorage(result[0])
 				mvpl.storeData(self.data, result)
-				#mvpl.plot(self.data, self.grafici)
+				mvpl.plot(self.data, self.grafici)
 
-	def saveData(self):
-		QtGui.QMessageBox. question(self, "LearnHotkeys","The file list has been updated.")
+	def infoSave(self):
+		info=QtGui.QMessageBox()
+		info.setIcon(QtGui.QMessageBox.Information)
+		info.setText("Disconnecting you will lose all data, do you want to save?")
+		info.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+		info.buttonClicked.connect(self.saveData)
+		info.exec_()
 
-		fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', path+"fileStore/"+time.strftime("%y%m%d%H%m"), selectedFilter='*.txt')
-		if fileName:
-			print fileName
+	def saveData(self, i):
+		if i.text()=="OK":
+			pathFile=path+"/fileStore/"+time.strftime("%y%m%d%H%m")+".txt"
+			fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', pathFile, selectedFilter='*.txt')
+			if fileName:
+				mvpl.Save(fileName, self.data)
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()

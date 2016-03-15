@@ -78,10 +78,9 @@ def plot(data, figure):
 
 		canvas.draw()
 
-def saveData(filename, data, strtipo):
+def Save(filename, data):
 	file = open (filename,"w")
 	file.write(time.strftime("%d/%m/%y %H:%m:%S"))
-	file.write("type="+str(strtipo))
 	print data.keys()
 	#for i in NMEA[strtipo][1]:
 		#if not i=='tipo':
