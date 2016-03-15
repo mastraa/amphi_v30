@@ -34,7 +34,7 @@ byte * b = (byte *) &mvic;
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(57600);
   //Serial.println(sizeof(Mvupb_t));
   pinMode(13, OUTPUT);
   mvup.tipo=7;
@@ -65,9 +65,11 @@ void setup() {
 }
 
 void loop() {
-  Serial.write(5);
+  mvup.attitude[0]=randNum();
+  mvup.attitude[1]=randNum();
+  mvup.attitude[2]=randNum();
   mvup.times=millis();
-  mvic.times=millis();
+  //mvic.times=millis();
   sendStruct(c, sizeof(Mvupb_t), '$', '\n');
   //sendStruct(b, sizeof(Mvicb_t), '$', '\n');
   delay(1000);
@@ -115,4 +117,13 @@ uint8_t getCheckSum(byte *buff, int l){//checksum for byte type
         XOR = XOR^buff[i];
     }
     return XOR;
+}
+
+float randNum(){
+  float num=(float)(rand()/100+5);
+  if (num>360){
+   num=num-(num-360+50.43);
+  }
+  return num; 
+
 }

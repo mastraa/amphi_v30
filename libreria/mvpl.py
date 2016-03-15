@@ -6,14 +6,14 @@ Metis Vela Python Library
 29/02/16
 Andrea Mastrangelo
 """
-import comLib, struct
+import comLib, struct, time
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 
 NMEA={};
 NMEA['MVIC']=[0,1,5,9,13,17]
 NMEA[10]=[['b','l','f','f','f','f','f'],[]]#MVIC
-NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','lat','lon','gradi','date','times''vel','roll','pitch','yaw','temp','left','right','wspeed','wdir_1','wdir_2']]#MVUP
+NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','lat','lon','gradi','date','times','vel','roll','pitch','yaw','temp','left','right','wspeed','wdir_1','wdir_2']]#MVUP
 NMEA[8]=[['b','l','l','L','L','L','f','f','f','f'],[]]#MVUPC
 
 def decodeNMEA(data):
@@ -41,20 +41,52 @@ def decodeNMEA(data):
 		n=n+l
 	return val
 
-def plotGraph(data, figura):
-	figura.clf()
-	x,y = [],[]
-	plot_1=figura.add_subplot(211)
-	plot_1.plot([1,2,3,4,5],[5,4,3,2,1])
+def createDataStorage(tipo):#create index of data storage dictionary
+	data={}
+	for i in NMEA[tipo][1]:
+		data[i]=[]
+	data['tipo']=tipo
+	return data
 
-	for i in data[-10:]:
-		x.append(i[5])
-		y.append(i[1]/1000)
-	plot_2=figura.add_subplot(212)
-	plot_2.plot(x,y)
+def storeData(buff, result):#for every iteration store last income data string in the dict
+	i=1
+	tipo=result[0]
+	while i < len(NMEA[tipo][1]):
+		buff[NMEA[tipo][1][i]].append(result[i])
+		i=i+1
 
-	"""self.fig_Inlet.clf()
-		ax1f1 = self.fig_Inlet.add_subplot(111)
-		ax1f1.plot(np.random.rand(5),np.random.rand(5))
-		self.canvasInlet.draw()"""
+def plot(data, figure):
+	if data[0][0]==7:
+		figura=figure['telemetria'][0]
+		canvas=figure['telemetria'][1]
+		roll, pitch, yaw, time, scarroccio=[],[],[],[],[]
+		figura.clf()
+		for i in data[-25:]:
+			roll.append(i[7])
+			pitch.append(i[8])
+			yaw.append(i[9])
+			time.append(i[5]/1000)
+			scarroccio.append(i[9])
+
+		plot_1=figura.add_subplot(211)
+		plot_1.plot(time,roll)
+		plot_1.plot(time,pitch)
+		plot_1.plot(time,yaw)
+
+		plot_2=figura.add_subplot(212)
+
+
+		canvas.draw()
+
+def saveData(filename, data, strtipo):
+	file = open (filename,"w")
+	file.write(time.strftime("%d/%m/%y %H:%m:%S"))
+	file.write("type="+str(strtipo))
+	print data.keys()
+	#for i in NMEA[strtipo][1]:
+		#if not i=='tipo':
+			#file.write(str(i)+": ")
+			#file.write(str(data[i]))
+			#file.write("\n")
+	file.close()
 
