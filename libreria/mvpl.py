@@ -7,11 +7,13 @@ Metis Vela Python Library
 Andrea Mastrangelo
 """
 import comLib, struct
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+import numpy as np
 
 NMEA={};
 NMEA['MVIC']=[0,1,5,9,13,17]
 NMEA[10]=[['b','l','f','f','f','f','f'],[]]#MVIC
-NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','prova']]#MVUP
+NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','lat','lon','gradi','date','times''vel','roll','pitch','yaw','temp','left','right','wspeed','wdir_1','wdir_2']]#MVUP
 NMEA[8]=[['b','l','l','L','L','L','f','f','f','f'],[]]#MVUPC
 
 def decodeNMEA(data):
@@ -39,5 +41,20 @@ def decodeNMEA(data):
 		n=n+l
 	return val
 
+def plotGraph(data, figura):
+	figura.clf()
+	x,y = [],[]
+	plot_1=figura.add_subplot(211)
+	plot_1.plot([1,2,3,4,5],[5,4,3,2,1])
 
+	for i in data[-10:]:
+		x.append(i[5])
+		y.append(i[1]/1000)
+	plot_2=figura.add_subplot(212)
+	plot_2.plot(x,y)
+
+	"""self.fig_Inlet.clf()
+		ax1f1 = self.fig_Inlet.add_subplot(111)
+		ax1f1.plot(np.random.rand(5),np.random.rand(5))
+		self.canvasInlet.draw()"""
 

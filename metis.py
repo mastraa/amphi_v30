@@ -1,6 +1,7 @@
 #!usr/bin/python
 
-# cd programmazione/programmi/python/amphi_v30cd desktop/andrea/programmazione/programmi/python/amphi_v30
+# cd desktop/andrea/programmazione/programmi/python/amphi_v30
+# cd Desktop/1001Vela/6000/Emessi/6024_ProgrammiDecodifica/amphi_v30
 
 
 import sys, serial
@@ -51,7 +52,7 @@ class MainWindow(QtGui.QMainWindow):
 		global baudList, gui
 		self.connStat = 0
 		self.device = 0 #device to connect
-		self.interval=500 #millis
+		self.interval=300 #millis
 		self.time=time.strftime("%H:%m:%S")
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
@@ -63,15 +64,20 @@ class MainWindow(QtGui.QMainWindow):
 
 		self.ui.show()
 
+
+	def figureSet(self):
+		self.infFig=Figure()
+		self.infCanv=FigureCanvas(self.infFig)
+
+		self.telFig_1=Figure()
+		self.telCanv_1=FigureCanvas(self.telFig_1)
+
 	def guiSetting(self):
 		self.ui=uic.loadUi(gui)#load gui
 		self.ui.BaudList.addItems(baudValues)
 		self.ui.connectionInfo.setReadOnly(1) #it will be scrollable
-		self.ui.infusionPlot.addWidget(self.canvasInlet)
-
-	def figureSet(self):
-		self.fig_Inlet=Figure()
-		self.canvasInlet=FigureCanvas(self.fig_Inlet)
+		self.ui.infusionPlot.addWidget(self.infCanv)
+		self.ui.telPlot.addWidget(self.telCanv_1)
 
 	def buttonFunction(self):#connect button to relative function
 		self.ui.DeviceButton.clicked.connect(self.SerialCheck)
@@ -110,13 +116,19 @@ class MainWindow(QtGui.QMainWindow):
 				result=mvpl.decodeNMEA(income)
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				self.data.append(result)
-				#self.graphicPlot()
+				self.graphicPlot(result[0])
 
-	def graphicPlot(self):
-		self.fig_Inlet.clf()
+	def graphicPlot(self, tipo):
+		if tipo==7:
+			mvpl.plotGraph(self.data, self.telFig_1)
+			self.telCanv_1.draw()
+		elif tipo==10:
+			mvpl.plotGraph(self.data, self.infCanv)
+
+		"""self.fig_Inlet.clf()
 		ax1f1 = self.fig_Inlet.add_subplot(111)
 		ax1f1.plot(np.random.rand(5),np.random.rand(5))
-		self.canvasInlet.draw()
+		self.canvasInlet.draw()"""
 		
 		
 
