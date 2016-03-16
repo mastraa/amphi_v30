@@ -9,6 +9,7 @@ Andrea Mastrangelo
 import comLib, struct, time, csv
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
+from PyQt4 import QtGui
 
 NMEA={};
 NMEA['MVIC']=[0,1,5,9,13,17]
@@ -99,6 +100,9 @@ def Save(filename, data):
 			file.write(',')
 		file.write('\n')
 	file.close()
+
+def windView(monitor):
+	monitor[1].display(12.3)
 
 	
 

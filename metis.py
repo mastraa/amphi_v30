@@ -58,8 +58,17 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui=uic.loadUi(gui)#load gui
 		self.ui.BaudList.addItems(baudValues)
 		self.ui.connectionInfo.setReadOnly(1) #it will be scrollable
+
+		#plot set
 		self.ui.infusionPlot.addWidget(self.infCanv)
 		self.ui.telPlot.addWidget(self.telCanv)
+
+		#set the wind_dir section
+		self.wind=[]
+		self.wind.append(QtGui.QGraphicsScene(self))
+		self.wind[0].setBackgroundBrush(QtCore.Qt.gray)
+		self.ui.windDirView.setScene(self.wind[0])
+		self.wind.append(self.ui.windSpeed)
 
 	def buttonFunction(self):#connect button to relative function
 		self.ui.DeviceButton.clicked.connect(self.SerialCheck)
@@ -100,7 +109,7 @@ class MainWindow(QtGui.QMainWindow):
 				if len(self.data)==0:
 					self.data=mvpl.createDataStorage(result[0])
 				mvpl.storeData(self.data, result)
-				mvpl.plot(self.data, self.grafici)
+				self.telemetryView()
 
 	def infoSave(self):
 		info=QtGui.QMessageBox()
@@ -116,6 +125,10 @@ class MainWindow(QtGui.QMainWindow):
 			fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', pathFile, selectedFilter='*.csv')
 			if fileName:
 				mvpl.Save(fileName, self.data)
+
+	def telemetryView(self):
+		mvpl.plot(self.data, self.grafici)
+		mvpl.windView(self.wind)
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()
