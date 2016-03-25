@@ -15,7 +15,7 @@ import numpy as np
 
 sys.path.append('libreria')
 
-import comLib, mvpl
+import comLib, mvpl, guiLib
 
 #global definition
 gui = "gui/MainGui.ui"
@@ -33,11 +33,15 @@ class MainWindow(QtGui.QMainWindow):
 		self.connStat = 0
 		self.device = 0 #device to connect
 		self.interval=300 #millis
+		self.i = 0 #frequenzimetro
 		self.time=time.strftime("%H:%m:%S")
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
 		self.timer.start(self.interval)
 		self.data={}#data storage dict
+		self.lost=0 #lost data counter
+		self.connTime, self.lastPackTime = 0, 0
+		self.icons={'status':['gui/img/redLed.png', 'gui/img/greenLed.png', 'gui/img/whiteLed.png']}
 
 		self.figureSet()
 		self.guiSetting()
@@ -58,17 +62,19 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui=uic.loadUi(gui)#load gui
 		self.ui.BaudList.addItems(baudValues)
 		self.ui.connectionInfo.setReadOnly(1) #it will be scrollable
-
+		self.ui.lcdTime.setDigitCount(8) #set time lcd digit
+		self.ui.lcdTime.display(time.strftime("%H"+":"+"%M"+":"+"%S"))
 		#plot set
 		self.ui.infusionPlot.addWidget(self.infCanv)
 		self.ui.telPlot.addWidget(self.telCanv)
-
 		#set the wind_dir section
 		self.wind=[]
 		self.wind.append(QtGui.QGraphicsScene(self))
 		self.wind[0].setBackgroundBrush(QtCore.Qt.gray)
 		self.ui.windDirView.setScene(self.wind[0])
 		self.wind.append(self.ui.windSpeed)
+		#ledStatus Init
+		guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][2])
 
 	def buttonFunction(self):#connect button to relative function
 		self.ui.DeviceButton.clicked.connect(self.SerialCheck)
@@ -89,11 +95,13 @@ class MainWindow(QtGui.QMainWindow):
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
+			self.connTime, self.lastPackTime = time.time(), time.time()
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: connect to ")+ port +" "+baud)
 			self.ui.ConnectionButton.setText("Disconnect")
+			guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][1])
 		else:
 			self.device.close()
-			self.device=0
+			self.device, self.lost, self.connTime=0
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
 			self.infoSave()
@@ -101,9 +109,20 @@ class MainWindow(QtGui.QMainWindow):
 
 	def timerFunctions(self):
 		self.time=time.strftime("%H:%M:%S")
-		if self.device:
+		self.i +=1
+		if self.i >= 1000/self.interval: #activation at one hertz
+			self.ui.lcdTime.display(time.strftime("%H"+":"+"%M"+":"+"%S"))
+			self.infoConn()
+			self.i = 0 #reset counter
+		if self.device: #if any device is connected
 			income = comLib.readIncomeByte(self.device)
-			if not isinstance(income, int):
+			if isinstance(income, int):
+				if income==2:
+					comLib.readUntil(self.device,'*')
+					self.lost=self.lost+1
+					self.ui.lostPackLCD.display(self.lost)#show lost Pack quantity from connection
+			else:
+				self.lastPackTime=time.time()
 				result=mvpl.decodeNMEA(income)
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				if len(self.data)==0:
@@ -129,6 +148,13 @@ class MainWindow(QtGui.QMainWindow):
 	def telemetryView(self):
 		mvpl.plot(self.data, self.grafici)
 		mvpl.windView(self.wind)
+
+	def infoConn(self):
+		if self.connTime:
+			now=time.time()
+			self.ui.connTimeLCD.display(int(now-self.connTime))
+			if (now-self.lastPackTime>5):
+				guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][0])
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()

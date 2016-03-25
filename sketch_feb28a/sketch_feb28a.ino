@@ -31,7 +31,7 @@ Mvup mvup;
 byte * c = (byte *) &mvup;
 byte * b = (byte *) &mvic;
 
-
+byte counter = 0;
 
 void setup() {
   Serial.begin(57600);
@@ -65,15 +65,21 @@ void setup() {
 }
 
 void loop() {
-  mvup.attitude[0]=randNum(0,25);
-  mvup.attitude[1]=randNum(0,10);
-  mvup.attitude[2]=randNum(0,360);
-  mvup.gradi=randNum(0,360);
+  mvup.attitude[0]=(float)random(0,25);
+  mvup.attitude[1]=(float)random(0,10);
+  mvup.attitude[2]=(float)random(0,360);
+  mvup.gradi=(float)random(0,360);
   mvup.times=millis();
   //mvic.times=millis();
   sendStruct(c, sizeof(Mvupb_t), '$', '\n');
   //sendStruct(b, sizeof(Mvicb_t), '$', '\n');
   delay(1000);
+
+  ++counter;
+  if (counter==10){
+    counter = 0;
+    delay(6000); 
+  }
 }
 
 
@@ -118,16 +124,4 @@ uint8_t getCheckSum(byte *buff, int l){//checksum for byte type
         XOR = XOR^buff[i];
     }
     return XOR;
-}
-
-float randNum(int minN,int maxN){
-  float num=(float)(rand()/1000+5);
-  while (num>maxN){
-   num=num-(num-maxN+0.43);
-  }
-  while (num<minN){
-    num=num+(minN-num+0.36);
-  }
-  return num; 
-
 }

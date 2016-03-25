@@ -46,12 +46,13 @@ def readIncomeByte(device, starter = '$', ender = '*'):
     _xor=0
     if device.inWaiting():#if any data incoming
         if device.read()==starter:
+            #print 'starter'
             c=device.read()
             while c!=ender:
                 data.append(ord(c))
                 _xor=_xor^data[-1]
                 c=device.read()
-            if _xor== ord(device.read()):
+            if _xor==ord(device.read()):
                 device.read()#clean \n byte
                 return data
             else:
@@ -87,3 +88,9 @@ def splitIncomeData(data, init):
         i=i+1
     result.append(data[init[i]:])
     return result
+
+def readUntil(device, flag):
+    c=0
+    while not c==flag:
+        if device.inWaiting():
+            c=device.read()
