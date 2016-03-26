@@ -29,8 +29,8 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True,
-          icon='/Users/mastraa/Desktop/1001Vela/6000/Emessi/6024_ProgrammiDecodifica/amphi_v30/gui/img/icona.icns' )
+          console=True)
+          
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

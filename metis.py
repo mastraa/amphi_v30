@@ -26,7 +26,7 @@ def pathDefine(i):
 	return path
 
 
-guiPath=pathDefine(0) #1:terminal 0:exe
+guiPath=pathDefine(1) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
 
