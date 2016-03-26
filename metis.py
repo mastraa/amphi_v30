@@ -13,14 +13,25 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 
-sys.path.append('libreria')
+#path control
+#decomment the one you need!!!
+
+def pathDefine(i):
+	if i == 0:
+		path =  os.path.join(os.path.dirname(sys.executable), 'gui')
+		sys.path.append(os.path.join(os.path.dirname(sys.executable),'libreria'))
+	else:
+		path="gui"
+		sys.path.append('libreria')
+	return path
+
+
+guiPath=pathDefine(0) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
 
 #global definition
-gui = "gui/MainGui.ui"
-#saveDialogGui="gui/saveDialog.ui"
-saveDialogGui="gui/widget.ui"
+gui = "/MainGui.ui"
 baudValues=["9600","57600","115200"]
 path = os.path.dirname(os.path.realpath(__file__))
 
@@ -29,7 +40,7 @@ class MainWindow(QtGui.QMainWindow):
 		QtGui.QMainWindow.__init__(self)
 
 		#variables
-		global baudList, gui, path
+		global baudList, gui, path, guiPath
 		self.connStat = 0
 		self.device = 0 #device to connect
 		self.interval=300 #millis
@@ -41,7 +52,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.data={}#data storage dict
 		self.lost=0 #lost data counter
 		self.connTime, self.lastPackTime = 0, 0
-		self.icons={'status':['gui/img/redLed.png', 'gui/img/greenLed.png', 'gui/img/whiteLed.png']}
+		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']}
 
 		self.figureSet()
 		self.guiSetting()
@@ -59,7 +70,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.grafici={'infusione':[self.infFig,self.infCanv], 'telemetria':[self.telFig,self.telCanv]}
 
 	def guiSetting(self):
-		self.ui=uic.loadUi(gui)#load gui
+		self.ui=uic.loadUi(guiPath+gui)#load gui
 		self.ui.BaudList.addItems(baudValues)
 		self.ui.connectionInfo.setReadOnly(1) #it will be scrollable
 		self.ui.lcdTime.setDigitCount(8) #set time lcd digit
@@ -74,7 +85,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.windDirView.setScene(self.wind[0])
 		self.wind.append(self.ui.windSpeed)
 		#ledStatus Init
-		guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][2])
+		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
 	def buttonFunction(self):#connect button to relative function
 		self.ui.DeviceButton.clicked.connect(self.SerialCheck)
@@ -98,10 +109,10 @@ class MainWindow(QtGui.QMainWindow):
 			self.connTime, self.lastPackTime = time.time(), time.time()
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: connect to ")+ port +" "+baud)
 			self.ui.ConnectionButton.setText("Disconnect")
-			guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][1])
+			guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])
 		else:
 			self.device.close()
-			self.device, self.lost, self.connTime=0
+			self.device, self.lost, self.connTime=0,0,0
 			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: disconnected"))
 			self.ui.ConnectionButton.setText("Connect")
 			self.infoSave()
@@ -154,9 +165,11 @@ class MainWindow(QtGui.QMainWindow):
 			now=time.time()
 			self.ui.connTimeLCD.display(int(now-self.connTime))
 			if (now-self.lastPackTime>5):
-				guiLib.ImageToLabel(self.ui.connStatus, self.icons['status'][0])
+				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0])
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()
 sys.exit(app.exec_())
+
+
 
