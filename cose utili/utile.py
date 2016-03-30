@@ -1,4 +1,3 @@
-		
 #inserire immagine dentro ad una GraphicView denominata ConnStatus_2
 		self.iconStatus=QtGui.QGraphicsScene(self)
 		self.ui.connStatus_2.setScene(self.iconStatus)

@@ -9,7 +9,7 @@ Andrea Mastrangelo
 import comLib, struct, time, csv
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 NMEA={};
 NMEA['MVIC']=[0,1,5,9,13,17]
@@ -101,8 +101,21 @@ def Save(filename, data):
 		file.write('\n')
 	file.close()
 
-def windView(monitor):
-	monitor[1].display(12.3)
+def windView(monitor, path, data):
+	background = QtGui.QPixmap(path+'segna.jpg')
+	item=monitor[0].addPixmap(background)
+	monitor[1].fitInView(item)
+	x_0,y_0=147,150
+	l=100
+	x=x_0+l*np.sin(data['wdir_1'][-1]*np.pi/180)
+	y=y_0-l*np.cos(data['wdir_1'][-1]*np.pi/180)
+	#monitor[0].removeItem(monitor[4])
+	line = QtGui.QGraphicsLineItem(x_0,y_0,x,y)
+	line.setPen(QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine))
+	monitor[0].addItem(line)
+	monitor[1].show()
+	monitor[2].display(data['wdir_1'][-1])
+	monitor[3].display(data['wspeed'][-1])
 
 	
 

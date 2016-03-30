@@ -65,11 +65,12 @@ void setup() {
 }
 
 void loop() {
-  mvup.attitude[0]=(float)random(0,25);
-  mvup.attitude[1]=(float)random(0,10);
-  mvup.attitude[2]=(float)random(0,360);
+  mvup.attitude[0]=(float)random(0,250)/10.0;
+  mvup.attitude[1]=(float)random(0,100)/10.0;
+  mvup.attitude[2]=(float)random(0,1800)/10.0;
   mvup.gradi=(float)random(0,360);
   mvup.times=millis();
+  mvup.vale_1=random(0,180);
   //mvic.times=millis();
   sendStruct(c, sizeof(Mvupb_t), '$', '\n');
   //sendStruct(b, sizeof(Mvicb_t), '$', '\n');

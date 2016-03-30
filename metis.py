@@ -81,9 +81,14 @@ class MainWindow(QtGui.QMainWindow):
 		#set the wind_dir section
 		self.wind=[]
 		self.wind.append(QtGui.QGraphicsScene(self))
-		self.wind[0].setBackgroundBrush(QtCore.Qt.gray)
-		self.ui.windDirView.setScene(self.wind[0])
+		self.wind.append(self.ui.windDirView)
 		self.wind.append(self.ui.windSpeed)
+		self.wind.append(self.ui.windDir)
+		self.wind.append(QtGui.QGraphicsLineItem(105,90,105,30))
+		self.wind[4].setPen(QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine))
+		self.wind[0].addItem(self.wind[4])
+		self.ui.windDirView.setScene(self.wind[0])
+		self.ui.windDirView.show()
 		#ledStatus Init
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
@@ -158,7 +163,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def telemetryView(self):
 		mvpl.plot(self.data, self.grafici)
-		mvpl.windView(self.wind)
+		mvpl.windView(self.wind, guiPath+'/img/', self.data)
 
 	def infoConn(self):
 		if self.connTime:
