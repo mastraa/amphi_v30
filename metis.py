@@ -49,7 +49,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
 		self.timer.start(self.interval)
-		self.data={}#data storage dict
+		self.data, self.extraData={},{}#data storage dict
 		self.lost=0 #lost data counter
 		self.connTime, self.lastPackTime = 0, 0
 		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']}
@@ -90,6 +90,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.windDirView.setScene(self.wind[0])
 		self.ui.windDirView.show()
 		#ledStatus Init
+		#set heading lcd section
+		self.heading=[self.ui.rollLCD, self.ui.pitchLCD, self.ui.yawLCD, self.ui.scarLCD]
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
 	def buttonFunction(self):#connect button to relative function
@@ -122,27 +124,27 @@ class MainWindow(QtGui.QMainWindow):
 			self.ui.ConnectionButton.setText("Connect")
 			self.infoSave()
 			self.data.clear()#clear store data dict
+			self.extraData.clear()
 
 	def timerFunctions(self):
 		self.time=time.strftime("%H:%M:%S")
-		self.i +=1
+		self.i +=1 #cycle counter increment (for 1hz activation)
 		if self.i >= 1000/self.interval: #activation at one hertz
-			self.ui.lcdTime.display(time.strftime("%H"+":"+"%M"+":"+"%S"))
-			self.infoConn()
 			self.i = 0 #reset counter
+			self.oneHertz(self.time)
 		if self.device: #if any device is connected
-			income = comLib.readIncomeByte(self.device)
-			if isinstance(income, int):
-				if income==2:
-					comLib.readUntil(self.device,'*')
-					self.lost=self.lost+1
+			income = comLib.readIncomeByte(self.device)#read byte on serial buffer
+			if isinstance(income, int):#list:ok, int: error
+				if income==2:#no starter error
+					comLib.readUntil(self.device,'*')#empty serial income buffer until last known character
+					self.lost=self.lost+1#increment losts packet counter
 					self.ui.lostPackLCD.display(self.lost)#show lost Pack quantity from connection
-			else:
-				self.lastPackTime=time.time()
-				result=mvpl.decodeNMEA(income)
+			else:#no error
+				self.lastPackTime=time.time()#update last package time
+				result=mvpl.decodeNMEA(income)#decode data
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
-				if len(self.data)==0:
-					self.data=mvpl.createDataStorage(result[0])
+				if len(self.data)==0:#if it is first data arrived
+					self.data=mvpl.createDataStorage(result[0])#create data storage
 				mvpl.storeData(self.data, result)
 				self.telemetryView()
 
@@ -162,15 +164,21 @@ class MainWindow(QtGui.QMainWindow):
 				mvpl.Save(fileName, self.data)
 
 	def telemetryView(self):
-		mvpl.plot(self.data, self.grafici)
+		mvpl.plot(self.data, self.extraData, self.grafici, self.heading, 25)
 		mvpl.windView(self.wind, guiPath+'/img/', self.data)
 
-	def infoConn(self):
+	def infoConn(self):#check connection status and alert user
 		if self.connTime:
 			now=time.time()
-			self.ui.connTimeLCD.display(int(now-self.connTime))
+			self.ui.connTimeLCD.display(int(now-self.connTime))#print connection time
 			if (now-self.lastPackTime>5):
-				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0])
+				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0])#alert status led
+
+	def oneHertz(self, time): #activate at one hertz
+		self.ui.lcdTime.display(time)# print time on digital clock
+		self.infoConn()
+
+
 
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()

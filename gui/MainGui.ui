@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1266</width>
-    <height>751</height>
+    <height>787</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,6 +131,70 @@
         <height>281</height>
        </rect>
       </property>
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>231</red>
+            <green>0</green>
+            <blue>30</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>231</red>
+            <green>0</green>
+            <blue>30</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>127</red>
+            <green>127</green>
+            <blue>127</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>237</red>
+            <green>237</green>
+            <blue>237</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
      </widget>
      <widget class="QPlainTextEdit" name="connectionInfo">
       <property name="enabled">
@@ -161,9 +225,9 @@
      <widget class="QLabel" name="label_10">
       <property name="geometry">
        <rect>
-        <x>980</x>
+        <x>950</x>
         <y>370</y>
-        <width>81</width>
+        <width>111</width>
         <height>20</height>
        </rect>
       </property>
@@ -184,9 +248,9 @@
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>980</x>
+        <x>950</x>
         <y>330</y>
-        <width>81</width>
+        <width>111</width>
         <height>20</height>
        </rect>
       </property>
@@ -205,7 +269,7 @@
         <x>9</x>
         <y>9</y>
         <width>911</width>
-        <height>481</height>
+        <height>681</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="telPlot"/>
@@ -231,7 +295,7 @@
          <height>41</height>
         </rect>
        </property>
-       <property name="numDigits">
+       <property name="digitCount">
         <number>4</number>
        </property>
       </widget>
@@ -240,7 +304,7 @@
         <rect>
          <x>10</x>
          <y>30</y>
-         <width>211</width>
+         <width>210</width>
          <height>180</height>
         </rect>
        </property>
@@ -254,7 +318,7 @@
          <height>41</height>
         </rect>
        </property>
-       <property name="numDigits">
+       <property name="digitCount">
         <number>4</number>
        </property>
       </widget>
@@ -263,9 +327,9 @@
       <property name="geometry">
        <rect>
         <x>930</x>
-        <y>270</y>
+        <y>280</y>
         <width>231</width>
-        <height>141</height>
+        <height>191</height>
        </rect>
       </property>
       <property name="title">
@@ -275,12 +339,12 @@
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>50</y>
+         <y>60</y>
          <width>91</width>
          <height>41</height>
         </rect>
        </property>
-       <property name="numDigits">
+       <property name="digitCount">
         <number>4</number>
        </property>
       </widget>
@@ -288,12 +352,12 @@
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>90</y>
+         <y>100</y>
          <width>91</width>
          <height>41</height>
         </rect>
        </property>
-       <property name="numDigits">
+       <property name="digitCount">
         <number>4</number>
        </property>
       </widget>
@@ -301,7 +365,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>30</y>
+         <y>40</y>
          <width>121</width>
          <height>21</height>
         </rect>
@@ -314,7 +378,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>110</y>
+         <y>120</y>
          <width>121</width>
          <height>21</height>
         </rect>
@@ -327,7 +391,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>70</y>
+         <y>80</y>
          <width>121</width>
          <height>21</height>
         </rect>
@@ -340,13 +404,39 @@
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>10</y>
+         <y>20</y>
          <width>91</width>
          <height>41</height>
         </rect>
        </property>
-       <property name="numDigits">
+       <property name="digitCount">
         <number>4</number>
+       </property>
+      </widget>
+      <widget class="QLCDNumber" name="scarLCD">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>140</y>
+         <width>91</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="digitCount">
+        <number>4</number>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>160</y>
+         <width>121</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Scarroccio</string>
        </property>
       </widget>
      </widget>

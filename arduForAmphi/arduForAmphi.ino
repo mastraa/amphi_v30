@@ -1,3 +1,5 @@
+int s[2] = {1,-1};
+
 struct Mvicb_t { //NMEA: Mètis Vela Infusion Check Byte
   byte tipo;
   unsigned long times;
@@ -65,9 +67,10 @@ void setup() {
 }
 
 void loop() {
+  byte b = random(0,2);
   mvup.attitude[0]=(float)random(0,250)/10.0;
   mvup.attitude[1]=(float)random(0,100)/10.0;
-  mvup.attitude[2]=(float)random(0,1800)/10.0;
+  mvup.attitude[2]=(float)random(0,1800)*s[b]/10.0;
   mvup.gradi=(float)random(0,360);
   mvup.times=millis();
   mvup.vale_1=random(0,180);
@@ -79,7 +82,7 @@ void loop() {
   ++counter;
   if (counter==10){
     counter = 0;
-    delay(6000); 
+    //delay(6000); 
   }
 }
 
