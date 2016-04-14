@@ -41,7 +41,8 @@ class MainWindow(QtGui.QMainWindow):
 
 		#variables
 		global baudList, gui, path, guiPath
-		self.connStat = 0
+		self.connStat = 0 #connection status (not check data income, only connection activation)
+		self.dataStatus = 0 #data income status
 		self.device = 0 #device to connect
 		self.interval=300 #millis
 		self.i = 0 #frequenzimetro
@@ -109,6 +110,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def Connection(self):
 		self.connStat = not self.connStat
+		self.dataStatus = 1
 		if self.connStat:
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
@@ -145,6 +147,9 @@ class MainWindow(QtGui.QMainWindow):
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				if len(self.data)==0:#if it is first data arrived
 					self.data=mvpl.createDataStorage(result[0])#create data storage
+				if self.dataStatus == 0:
+					self.dataStatus = 1
+					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])
 				mvpl.storeData(self.data, result)
 				self.telemetryView()
 
@@ -172,6 +177,7 @@ class MainWindow(QtGui.QMainWindow):
 			now=time.time()
 			self.ui.connTimeLCD.display(int(now-self.connTime))#print connection time
 			if (now-self.lastPackTime>5):
+				self.dataStatus = 0
 				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0])#alert status led
 
 	def oneHertz(self, time): #activate at one hertz
