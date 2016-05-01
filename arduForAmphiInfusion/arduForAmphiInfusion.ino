@@ -25,21 +25,19 @@ mvic_t mvic;
 
 void setup() {
   Serial.begin(57600);
-  Serial.println("R[Ohm] \t t[°C]");
+  Serial.println("\n est_t[°C] \t est_u[%] \t inl_t[°C] \t out_t[°C] \t ins_t[°C]");
   dht.begin();
   sensor_t sensor;
   delayMS = sensor.min_delay / 1000;
   pinMode(SAVELED, OUTPUT);
   pinMode(SAVEBTN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(SAVEBTN), ISR_FUNC, RISING);
   // put your setup code here, to run once:
 
 }
 
 void loop() {
   delay(1000);
-  Serial.println(digitalRead(SAVEBTN));//ATTENZIONE PROBLEMA CON IL PULSANTE DELLA SCHEDA, RESETTA IL MODULO, PROBABILE CORTO
-  digitalWrite(SAVELED,HIGH);
-  
   
   int dv_1=analogRead(INLET);
   float Rx=R1*(1024-dv_1)/dv_1;
@@ -59,6 +57,11 @@ void loop() {
     mvic.ext_u=event.relative_humidity;
   }
   printMVIC(mvic);
+}
+
+void ISR_FUNC(){
+  save=!save;
+  digitalWrite(SAVELED, save);
 }
 
 void printMVIC(struct Mvic_t data){
