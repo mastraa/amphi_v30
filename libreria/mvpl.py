@@ -7,7 +7,7 @@ Metis Vela Python Library
 Andrea Mastrangelo
 """
 import comLib, struct, time, csv
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
