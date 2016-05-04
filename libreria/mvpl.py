@@ -11,11 +11,17 @@ import comLib, struct, time, csv
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
-NMEA={};
+NMEA={}
 NMEA['MVIC']=[0,1,5,9,13,17]
 NMEA[10]=[['b','l','f','f','f','f','f'],[]]#MVIC
 NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tipo','lat','lon','gradi','date','times','vel','roll','pitch','yaw','temp','left','right','wspeed','wdir_1','wdir_2']]#MVUP
 NMEA[8]=[['b','l','l','L','L','L','f','f','f','f'],[]]#MVUPC
+
+fileNMEA={}
+fileNMEA['$MVUP']=['time','lat','lon','vel','course','roll','pitch','yaw']
+
+
+
 
 def decodeNMEA(data):#decodification of nmea data
 	val=[]
@@ -132,5 +138,12 @@ def windView(monitor, path, data):
 	monitor[2].display(data['wdir_1'][-1])
 	monitor[3].display(data['wspeed'][-1])
 
-	
+def readDataFile(file):
+	in_file = open(file,"r")
+	content = in_file.readlines()
+	print content[0]
+	#data={
+	#label:None for label in fileNMEA[tipo]
+	#}
+	in_file.close()
 
