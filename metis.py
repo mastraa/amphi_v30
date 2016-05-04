@@ -7,10 +7,10 @@
 
 import sys, serial, time, struct, os
 from PyQt4 import QtCore, QtGui, uic
+from PyQt4.phonon import Phonon
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 
 #path control
@@ -50,16 +50,20 @@ class MainWindow(QtGui.QMainWindow):
 		self.timer=QtCore.QTimer(self)
 		self.timer.timeout.connect(self.timerFunctions)
 		self.timer.start(self.interval)
-		self.data, self.extraData={},{}#data storage dict
+		self.data = self.extraData={}#data storage dict, extraData will take postProc data from some functions like scarroccio from mvpl.plot()
 		self.lost=0 #lost data counter
-		self.connTime, self.lastPackTime = 0, 0
-		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']}
+		self.connTime= self.lastPackTime = 0
+		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']} #set path to led color
 
-		self.figureSet()
-		self.guiSetting()
-		self.buttonFunction()
+		self.media=Phonon.MediaObject(self)
+		self.video=Phonon.VideoWidget(self)
+		Phonon.createPath(self.media,self.video)
 
-		self.ui.show()
+		self.figureSet() #setting figures for plotting
+		self.guiSetting() #extra gui setting
+		self.functionConnect() #connection between object and handlers
+
+		self.ui.show() #show gui
 
 	def figureSet(self):
 		self.infFig=Figure()
@@ -79,53 +83,70 @@ class MainWindow(QtGui.QMainWindow):
 		#plot set
 		self.ui.infusionPlot.addWidget(self.infCanv)
 		self.ui.telPlot.addWidget(self.telCanv)
+		#set video analysis
+		self.video.setMinimumSize(400,400)
+		self.ui.videoLayout.addWidget(self.video)
 		#set the wind_dir section
-		self.wind=[]
+		self.wind=[] #list with all gui object for wind section
 		self.wind.append(QtGui.QGraphicsScene(self))
 		self.wind.append(self.ui.windDirView)
 		self.wind.append(self.ui.windSpeed)
 		self.wind.append(self.ui.windDir)
-		self.wind.append(QtGui.QGraphicsLineItem(105,90,105,30))
-		self.wind[4].setPen(QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine))
-		self.wind[0].addItem(self.wind[4])
+		self.wind.append(QtGui.QGraphicsLineItem(105,90,105,30)) #banderuola
+		self.wind[4].setPen(QtGui.QPen(QtCore.Qt.red, 5, QtCore.Qt.SolidLine)) #arrow for banderuola
+		self.wind[0].addItem(self.wind[4]) #add drawing to the scene
 		self.ui.windDirView.setScene(self.wind[0])
 		self.ui.windDirView.show()
-		#ledStatus Init
 		#set heading lcd section
 		self.heading=[self.ui.rollLCD, self.ui.pitchLCD, self.ui.yawLCD, self.ui.scarLCD]
+		#init led status
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
-	def buttonFunction(self):#connect button to relative function
-		self.ui.DeviceButton.clicked.connect(self.SerialCheck)
+	def functionConnect(self):
+		"""
+		Connect object to relative function
+		"""
+		self.ui.deviceCheckBtn.clicked.connect(self.SerialCheck)
 		self.ui.addValueButton.clicked.connect(self.addBaud)
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
+		self.media.stateChanged.connect(self.handleStateChanged)
+		self.ui.loadVideo.clicked.connect(self.handleButton)
+		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
+		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
+		self.ui.pauseVideo.clicked.connect(lambda:self.playVideo(0))
 
 	def SerialCheck(self):#control device connected
 		self.ui.DeviceList.clear()
 		self.ui.DeviceList.addItems(comLib.checkSerialDevice())
 
-	def addBaud(self):#adding new baud value to the list
+	def addBaud(self):
+		"""
+		Add new badRate to the list and clear text box
+		"""
 		self.ui.BaudList.addItem(self.ui.persBaud.text())
 		self.ui.persBaud.clear()
 
 	def Connection(self):
-		self.connStat = not self.connStat
-		self.dataStatus = 1
+		"""
+		Connection to device
+		"""
+		self.connStat = not self.connStat #switch connection status 1:connect, 0:disconnect
+		self.dataStatus = 1 #reset data status flag
 		if self.connStat:
 			port = str(self.ui.DeviceList.currentText())
 			baud = self.ui.BaudList.currentText()
 			self.device = serial.Serial(port,int(baud))
-			self.connTime, self.lastPackTime = time.time(), time.time()
-			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: connect to ")+ port +" "+baud)
-			self.ui.ConnectionButton.setText("Disconnect")
-			guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])
+			self.connTime = self.lastPackTime = time.time() #reset timers
+			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: connect to ")+ port +" "+baud) #display connection parameters on monitor
+			self.ui.ConnectionButton.setText("Disconnect") #change button text
+			guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1]) #set led connection color
 		else:
 			self.device.close()
-			self.device, self.lost, self.connTime=0,0,0
-			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: disconnected"))
-			self.ui.ConnectionButton.setText("Connect")
+			self.device = self.lost = self.connTime=0 #reset variables
+			self.ui.connectionInfo.appendPlainText(time.strftime("%d/%m/%y %H:%M:%S: disconnected")) #display connection parameters on monitor
+			self.ui.ConnectionButton.setText("Connect") #change button text
 			self.infoSave()
-			self.data.clear()#clear store data dict
+			self.data.clear() #clear store data dict
 			self.extraData.clear()
 
 	def timerFunctions(self):
@@ -146,12 +167,24 @@ class MainWindow(QtGui.QMainWindow):
 				result=mvpl.decodeNMEA(income)#decode data
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				if len(self.data)==0:#if it is first data arrived
-					self.data=mvpl.createDataStorage(result[0])#create data storage
-				if self.dataStatus == 0:
-					self.dataStatus = 1
-					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])
+					self.data=mvpl.createDataStorage(result[0])#create data storage, giving type byte
+				if self.dataStatus == 0: #if dataStatus is setted false...
+					self.dataStatus = 1 #...reset it...
+					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])#...and change led status color
 				mvpl.storeData(self.data, result)
 				self.telemetryView()
+
+	def oneHertz(self, time): #activate at one hertz
+		self.ui.lcdTime.display(time)# print time on digital clock
+		self.infoConn()
+
+	def infoConn(self):#check connection status and alert user
+		if self.connTime:
+			now=time.time()
+			self.ui.connTimeLCD.display(int(now-self.connTime))#print connection time
+			if (now-self.lastPackTime>5): #if more than x seconds from last received data are passed...
+				self.dataStatus = 0 #set status to false
+				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0]) #change status led to red
 
 	def infoSave(self):
 		info=QtGui.QMessageBox()
@@ -172,17 +205,28 @@ class MainWindow(QtGui.QMainWindow):
 		mvpl.plot(self.data, self.extraData, self.grafici, self.heading, 25)
 		mvpl.windView(self.wind, guiPath+'/img/', self.data)
 
-	def infoConn(self):#check connection status and alert user
-		if self.connTime:
-			now=time.time()
-			self.ui.connTimeLCD.display(int(now-self.connTime))#print connection time
-			if (now-self.lastPackTime>5):
-				self.dataStatus = 0
-				guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][0])#alert status led
+	def handleStateChanged(self):
+		pass
 
-	def oneHertz(self, time): #activate at one hertz
-		self.ui.lcdTime.display(time)# print time on digital clock
-		self.infoConn()
+	def playVideo(self, state):
+		"""
+		play/pause/stop the video
+		1: play, 2:stop, 0:pause
+		"""
+		if state == 0:
+			self.media.pause()
+		elif state == 1:
+			self.media.play()
+		else:
+			self.media.stop()
+
+	def handleButton(self):
+		if self.media.state()==Phonon.PlayingState:
+			self.media.stop()
+		else:
+			path=QtGui.QFileDialog.getOpenFileName(self,self.ui.loadVideo.text())
+			if path:
+				self.media.setCurrentSource(Phonon.MediaSource(path))
 
 
 
