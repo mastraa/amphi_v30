@@ -13,10 +13,10 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
 
-#path control
-#decomment the one you need!!!
-
 def pathDefine(i):
+	"""
+	It defines path alternately for executable file or .py file
+	"""
 	if i == 0:
 		path =  os.path.join(os.path.dirname(sys.executable), 'gui')
 		sys.path.append(os.path.join(os.path.dirname(sys.executable),'libreria'))
@@ -115,7 +115,11 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
 		self.ui.pauseVideo.clicked.connect(lambda:self.playVideo(0))
 
-	def SerialCheck(self):#control device connected
+	def SerialCheck(self):
+		"""
+		Check if any device is connected to serial port
+		if there is any add it drop down menu
+		"""
 		self.ui.DeviceList.clear()
 		self.ui.DeviceList.addItems(comLib.checkSerialDevice())
 
@@ -164,14 +168,14 @@ class MainWindow(QtGui.QMainWindow):
 					self.ui.lostPackLCD.display(self.lost)#show lost Pack quantity from connection
 			else:#no error
 				self.lastPackTime=time.time()#update last package time
-				result=mvpl.decodeNMEA(income)#decode data
+				result=mvpl.decodeNMEA(income,mvpl.NMEA)#decode data
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				if len(self.data)==0:#if it is first data arrived
 					self.data=mvpl.createDataStorage(result[0])#create data storage, giving type byte
 				if self.dataStatus == 0: #if dataStatus is setted false...
 					self.dataStatus = 1 #...reset it...
 					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])#...and change led status color
-				mvpl.storeData(self.data, result)
+				mvpl.storeData(self.data, result, mvpl.NMEA)
 				self.telemetryView()
 
 	def oneHertz(self, time): #activate at one hertz
@@ -199,7 +203,7 @@ class MainWindow(QtGui.QMainWindow):
 			pathFile=path+"/fileStore/"+time.strftime("%y%m%d%H%M")+".csv"
 			fileName=QtGui.QFileDialog.getSaveFileName(self, 'Save Data', pathFile, selectedFilter='*.csv')
 			if fileName:
-				mvpl.Save(fileName, self.data)
+				mvpl.Save(fileName, self.data, mvpl.NMEA)
 
 	def telemetryView(self):
 		mvpl.plot(self.data, self.extraData, self.grafici, self.heading, 25)

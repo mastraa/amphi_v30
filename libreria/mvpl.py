@@ -7,7 +7,6 @@ Metis Vela Python Library
 Andrea Mastrangelo
 """
 import comLib, struct, time, csv
-#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -18,16 +17,20 @@ NMEA[7]=[['b','l','l','L','L','L','f','f','f','f','f','f','f','b','b','b'],['tip
 NMEA[8]=[['b','l','l','L','L','L','f','f','f','f'],[]]#MVUPC
 
 fileNMEA={}
-fileNMEA['$MVUP']=['time','lat','lon','vel','course','roll','pitch','yaw']
+fileNMEA['$MVUP']=['time','lat','lon','vel','course','roll','pitch','yaw','ws','wd_1','wd_2','ld','ls']#it has other parameters that we don't use now
 
 
-
-
-def decodeNMEA(data):#decodification of nmea data
+def decodeNMEA(data,NMEAType):#decodification of nmea data
+	"""
+	decoding simil NMEA byte string parsing byte to byte/int/float/long values
+	data: byte string
+	NMEAType: list of possible byte string
+	return decoded data list
+	"""
 	val=[]
-	tipo=data[0]
+	tipo=data[0]#detecting type of string from the first byte received
 	n=0
-	for i in NMEA[tipo][0]:#list of data type for the nmea tipo
+	for i in NMEAType[tipo][0]:#dataType list
 		if i =='b':#byte
 			l=1#leght = 1
 			val.append(data[n])
@@ -49,23 +52,43 @@ def decodeNMEA(data):#decodification of nmea data
 	return val
 
 def createDataStorage(tipo):#create index of data storage dictionary
+	"""
+	Create a dict with the the data names as labels
+	tipo: byte_type, first byte received
+	return the dict
+	"""
 	data={}#create dict
 	for i in NMEA[tipo][1][1:]:#label for data incoming
 		data[i]=[]#append new list in the dict with the label name
-	data['tipo']=tipo#set tipo variable
+	data['tipo']=tipo#set tipo variable, it will be stored only one times
 	return data
 
-def storeData(buff, data):#for every iteration store last income data string in the dict
+def storeData(buff, data, NMEAType):#for every iteration store last income data string in the dict
+	"""
+	Store data received in the dictionary
+	buff: dictionary
+	data: incoming data
+	NMEAType: list of possible byte string
+	"""
 	i=1
 	tipo=data[0]#search nmea type
-	while i < len(NMEA[tipo][1]):
-		if NMEA[tipo][1][i]=='times':
-			buff[NMEA[tipo][1][i]].append(data[i]/1000)
+	while i < len(NMEAType[tipo][1]):
+		if NMEAType[tipo][1][i]=='times':
+			buff[NMEAType[tipo][1][i]].append(data[i]/1000)
 		else:
-			buff[NMEA[tipo][1][i]].append(data[i])
+			buff[NMEAType[tipo][1][i]].append(data[i])
 		i=i+1
 
 def plot(data, extraData, figure, monitor, n):
+	"""
+	Plot graph
+	data: dictionary with all data stored
+	extraData: disctionary with some data created in post proc
+	figure & monitor: space to plot
+	n: number of data to plot
+
+	this function must be review!!!
+	"""
 	if data['tipo']==7:
 		figura=figure['telemetria'][0]
 		canvas=figure['telemetria'][1]
@@ -106,20 +129,23 @@ def plot(data, extraData, figure, monitor, n):
 		monitor[2].display(data['yaw'][-1])
 		monitor[3].display(extraData['scarroccio'][-1])
 
-def Save(filename, data):
+def Save(filename, data, NMEAType):
+	"""
+	Save dict data in text file
+	"""
 	file = open(filename, 'wb')
-	head=NMEA[data['tipo']][1]
+	head=NMEAType[data['tipo']][1]#list of labels
 	for item in head:
 		file.write(item+',')
 	file.write('\n')
 	for i in range(len(data['times'])):
 		for item in head:
-			if item=='tipo':
+			if item=='tipo':#type byte is stored only one times
 				file.write(str(data[item]))
-			else:
+			else:#other datas are stored in lists
 				file.write(str(data[item][i]))
-			file.write(',')
-		file.write('\n')
+			file.write(',')#data separeted by comma
+		file.write('\n')#new line
 	file.close()
 
 def windView(monitor, path, data):
@@ -138,12 +164,40 @@ def windView(monitor, path, data):
 	monitor[2].display(data['wdir_1'][-1])
 	monitor[3].display(data['wspeed'][-1])
 
-def readDataFile(file):
-	in_file = open(file,"r")
-	content = in_file.readlines()
-	print content[0]
-	#data={
-	#label:None for label in fileNMEA[tipo]
-	#}
-	in_file.close()
+def readDataFile(file,fileType):
+    """
+    read data from simil NMEA Metis Vela code
+    file: path to file, including extension
+    fileType: NMEA ascii string list 
+    """
+    in_file = open(file,"r")
+    content = in_file.readlines()
+    in_file.close()
+    nome,data,ora = content[0].split(' - ')
+    time=[int(ora[4:6]),int(ora[2:4]),int(ora[0:2])+2]
+    tipo=content[1].split(',')[0]
+    data={
+    label:[] for label in fileNMEA[tipo]
+    }
+    temp=[]#temporary label store to recovery label of values knowing only his position (dict non preserve order)
+    for label in fileNMEA[tipo]:
+    	temp.append(label)
+    for item in content[1:]:
+        values=item.split(',')
+        a=0
+        for i in range(1,len(values)):
+        	try:
+        		data[temp[a]].append(int(values[i]))#try to save as a int 
+        		print temp[a], values[i]
+        		a=a+1
+        		#ValueError occur when data from text is a label or when it is a floating point number
+        		#Index error occur when label is written in the last position (label list of amphi is shorter)
+        	except (ValueError, IndexError):
+        		try:
+        			data[temp[a]].append(float(values[i]))#try to save as a float
+        			a=a+1
+        		except (ValueError,IndexError):
+        			pass
+
+    return time,data
 
