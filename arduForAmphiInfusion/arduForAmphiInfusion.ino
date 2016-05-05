@@ -7,9 +7,13 @@
 
 #define DHTTYPE           DHT11     // DHT 11
 
+#define TIMEOUT           5         //seconds
+
 //PIN DEFINE
 #define DHTPIN            2         // Pin which is connected to the DHT sensor.
-#define INLET             0
+#define INLET             0         //analog
+#define OUTLET            1         //analog
+#define INSIDE            2         //analog
 #define SAVELED           4
 #define SAVEBTN           3
 
@@ -19,6 +23,7 @@ float k;
 float R1=10000.0;
 uint32_t delayMS;
 bool save = 0;
+unsigned long timer=0;
 
 typedef struct Mvic_t mvic_t;
 mvic_t mvic;
@@ -38,10 +43,10 @@ void setup() {
 
 void loop() {
   delay(1000);
+
+  mvic.inl_t=readTerm(INLET);
   
-  int dv_1=analogRead(INLET);
-  float Rx=R1*(1024-dv_1)/dv_1;
-  mvic.inl_t = -22.62*log(Rx)+233.67;
+
 
 
   // Get temperature event and print its value.
@@ -56,12 +61,16 @@ void loop() {
     dht.humidity().getEvent(&event);
     mvic.ext_u=event.relative_humidity;
   }
-  printMVIC(mvic);
+  if (save) printMVIC(mvic);
 }
 
 void ISR_FUNC(){
-  save=!save;
-  digitalWrite(SAVELED, save);
+  if ((millis()-timer)>(TIMEOUT*1000)){
+    save=!save;
+    digitalWrite(SAVELED, save);
+    timer=millis();
+  }
+  
 }
 
 void printMVIC(struct Mvic_t data){
@@ -71,5 +80,12 @@ void printMVIC(struct Mvic_t data){
   Serial.print(mvic.oul_t);Serial.print('\t');
   Serial.print(mvic.ins_t);Serial.print('\n');
 }
+
+float readTerm(byte pin){
+  int dv_1=analogRead(INLET);
+  float Rx=R1*(1024-dv_1)/dv_1;
+  return (-22.62*log(Rx)+233.67);
+}
+
 
 
