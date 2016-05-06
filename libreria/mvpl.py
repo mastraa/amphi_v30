@@ -149,7 +149,7 @@ def Save(filename, data, NMEAType):
 	file.close()
 
 def windView(monitor, path, data):
-	background = QtGui.QPixmap(path+'segna.jpg')
+	background = QtGui.QPixmap(path+'segna.png')
 	item=monitor[0].addPixmap(background)
 	monitor[1].fitInView(item)
 	x_0,y_0=147,150

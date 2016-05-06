@@ -26,7 +26,6 @@ def pathDefine(i):
 		sys.path.append('libreria')
 	return path
 
-
 guiPath=pathDefine(1) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
@@ -87,7 +86,22 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.lcdTime.display(time.strftime("%H"+":"+"%M"+":"+"%S"))
 		#plot set
 		self.ui.infusionPlot.addWidget(self.infCanv)
-		self.ui.telPlot.addWidget(self.telCanv)
+		
+		"""
+		WORKING ZONE, PORTING TO PYQTGRAPH
+		"""
+		#self.ui.telPlot.addWidget(self.telCanv)
+		self.rollPitchPlot=pg.PlotWidget(name='RollPitch')
+		self.ui.telPlot.addWidget(self.rollPitchPlot)
+		self.rollPitchPlot.show()
+		self.YawScarPlot=pg.PlotWidget(name='YawScar')
+		self.ui.telPlot.addWidget(self.YawScarPlot)
+		self.YawScarPlot.show()
+		guiLib.plotter([self.rollPitchPlot,self.YawScarPlot],[[[0,1,2],[[2,3,4],[1,2,3]]],[[2,3,4],[3,6,9]]])
+		"""
+		END WORKING ZONE
+		"""
+		
 		#set video analysis
 		self.video.setMinimumSize(400,400)
 		self.ui.videoLayout.addWidget(self.video)
