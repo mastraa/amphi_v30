@@ -12,6 +12,7 @@ from PyQt4.phonon import Phonon
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
+import pyqtgraph as pg
 
 def pathDefine(i):
 	"""
@@ -101,6 +102,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.heading=[self.ui.rollLCD, self.ui.pitchLCD, self.ui.yawLCD, self.ui.scarLCD]
 		#init led status
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
+
 
 	def functionConnect(self):
 		"""
