@@ -164,12 +164,14 @@ def windView(monitor, path, data):
 	monitor[2].display(data['wdir_1'][-1])
 	monitor[3].display(data['wspeed'][-1])
 
-def readDataFile(file,fileType):
+def readDataFile(file,fileType=None):
     """
     read data from simil NMEA Metis Vela code
     file: path to file, including extension
-    fileType: NMEA ascii string list 
+    fileType: NMEA ascii string list
     """
+	if fileType is None:
+		fileType = fileNMEA
     in_file = open(file,"r")
     content = in_file.readlines()
     in_file.close()
@@ -177,17 +179,17 @@ def readDataFile(file,fileType):
     time=[int(ora[4:6]),int(ora[2:4]),int(ora[0:2])+2]
     tipo=content[1].split(',')[0]
     data={
-    label:[] for label in fileNMEA[tipo]
+    label:[] for label in fileType[tipo]
     }
     temp=[]#temporary label store to recovery label of values knowing only his position (dict non preserve order)
-    for label in fileNMEA[tipo]:
+    for label in fileType[tipo]:
     	temp.append(label)
     for item in content[1:]:
         values=item.split(',')
         a=0
         for i in range(1,len(values)):
         	try:
-        		data[temp[a]].append(int(values[i]))#try to save as a int 
+        		data[temp[a]].append(int(values[i]))#try to save as a int
         		print temp[a], values[i]
         		a=a+1
         		#ValueError occur when data from text is a label or when it is a floating point number
@@ -200,4 +202,3 @@ def readDataFile(file,fileType):
         			pass
 
     return time,data
-
