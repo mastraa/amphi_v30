@@ -58,6 +58,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']} #set path to led color
 
 		self.media=Phonon.MediaObject(self)
+		self.media.setTickInterval(250)
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
@@ -117,6 +118,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.addValueButton.clicked.connect(self.addBaud)
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
 		self.media.stateChanged.connect(self.handleStateChanged)
+		self.media.tick.connect(self.plotter.tickHandler)
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
