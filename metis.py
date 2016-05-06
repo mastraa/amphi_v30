@@ -60,6 +60,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
+		self.plotter = pg.PlotWidget() #Add a graph plotter
+
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
 		self.functionConnect() #connection between object and handlers
@@ -103,6 +105,8 @@ class MainWindow(QtGui.QMainWindow):
 		#init led status
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
+		#Plot
+		self.ui.plotVideoLayout.addWidget(self.plotter)
 
 	def functionConnect(self):
 		"""
@@ -239,6 +243,3 @@ class MainWindow(QtGui.QMainWindow):
 app = QtGui.QApplication(sys.argv)
 window=MainWindow()
 sys.exit(app.exec_())
-
-
-
