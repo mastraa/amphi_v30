@@ -62,7 +62,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
-		self.plotter = myPlotWidget() #Add a graph plotter
+		self.plotter = myPlotWidget(length=self.media.totalTime()) #Add a graph plotter
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
