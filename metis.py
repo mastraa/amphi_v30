@@ -30,6 +30,7 @@ def pathDefine(i):
 guiPath=pathDefine(1) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
+from myPlotWidget import myPlotWidget
 
 #global definition
 gui = "/MainGui.ui"
@@ -60,7 +61,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
-		self.plotter = pg.PlotWidget() #Add a graph plotter
+		self.plotter = myPlotWidget() #Add a graph plotter
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
