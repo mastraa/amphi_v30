@@ -170,8 +170,8 @@ def readDataFile(file,fileType=None):
     file: path to file, including extension
     fileType: NMEA ascii string list
     """
-	if fileType is None:
-		fileType = fileNMEA
+    if fileType is None:
+    	fileType = fileNMEA
     in_file = open(file,"r")
     content = in_file.readlines()
     in_file.close()
