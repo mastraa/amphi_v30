@@ -4,14 +4,20 @@ import numpy as np
 def myCurve(x_array):
     """ A dummy curve to plot (a sine):
         x_array: array of time values in milliseconds
+        Returns:
+            [x,y] an array with the coordinates of the points of the curve, time
+            in seconds. In case we give an interval outside of the boundary of
+            the curve, it can simply return nothing (actually [[],[]]).
     """
     period = 3000
-    return np.sin(x_array*np.pi/period)
+    return x_array/1000., np.sin(x_array*np.pi/period)
 
 class myPlotWidget(pg.PlotWidget):
     """Extend the class pyqtgraph.PlotWidget to serve our purposes.
     TODO: add an argument `datafile` so that when the instance is created it
-    loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
+        loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
+    TODO: add a totalTimeChangedHandler, so that, when we know the size of the
+        media file we can plot the remaining figure at once.
     """
     def __init__(self, *args, **kwargs):
         """Get optional parameters:
@@ -39,6 +45,11 @@ class myPlotWidget(pg.PlotWidget):
         self.thisPlotItem = self.getPlotItem()
         self.thisViewBox = self.thisPlotItem.getViewBox()
         self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
+
+        # The curve to be plotted. Simply put a function that takes an interval
+        # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
+        # seconds and it should work.
+        self.Curve = myCurve
 
         # Initialize the plot if length is defined
         if self.length is not None:
@@ -72,9 +83,8 @@ class myPlotWidget(pg.PlotWidget):
             xstart = self.xMaxPlotted
         if xstart > xmax:
             return None
-        x = np.arange(xstart,xmax,250)
-        y = myCurve(x)
-        x = x/1000.
+        interval = np.arange(xstart,xmax,250)
+        x, y = self.Curve(interval)
         self.plot(x,y)
         self.xMaxPlotted = xmax
 
