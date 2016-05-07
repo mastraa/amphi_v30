@@ -13,7 +13,16 @@ def myCurve(x_array):
     return x_array/1000., np.sin(x_array*np.pi/period)
 
 class myPlotWidget(pg.PlotWidget):
-    """Extend the class pyqtgraph.PlotWidget to serve our purposes.
+    """Extend the class pyqtgraph.PlotWidget to serve our purposes. If initialized
+    it plots a moving window with assigned range and updates the plot at a certain
+    framerate given by an external signal.
+    Instructions:
+     - Pass the parameter initialize=True.
+     - Set xHighRange and xLowRange to fix the view range.
+     - Overload the method myPlotWidget.Curve to define the data to be plotted.
+     - Connect the tickHandler to a tickSignal returning the current time in
+        milliseconds.
+
     TODO: add an argument `datafile` so that when the instance is created it
         loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
     """
