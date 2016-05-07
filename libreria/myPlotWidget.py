@@ -6,7 +6,7 @@ def myCurve(x_array):
         x_array: array of time values in milliseconds
     """
     period = 3000
-    return np.sin(x*np.pi/period)
+    return np.sin(x_array*np.pi/period)
 
 class myPlotWidget(pg.PlotWidget):
     """Extend the class pyqtgraph.PlotWidget to serve our purposes.
@@ -14,14 +14,34 @@ class myPlotWidget(pg.PlotWidget):
     loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
     """
     def __init__(self, *args, **kwargs):
+        """Get optional parameters:
+            length: length of the media file
+            xHighRange: upper semiInterval to be shown, i.e. we will plot
+                [ current_time - xLowRange, current_time + xHighRange ]
+            xLowRange: as before
+            xStartTime: ?
+            plotType: TODO planned feature, to tell the widget whether to plot
+                everything at the begging or plot as we go or something else.
+                Not used right now.
+        """
         self.length = kwargs.pop('length',None)
+        self.xHighRange = kwargs.pop('xHighRange',2500)
+        self.xLowRange = kwargs.pop('xLowRange',2500)
+        self.curTime = kwargs.pop('xStartTime',0)
         super(myPlotWidget, self).__init__(*args,**kwargs)
+
+        self.updateMargins(self.curTime)
         self.semiInterval = 2500
         # We get the PlotItem associated in order to modify the plot, e.g
         # add the vertical line in tickHandler.
         self.thisPlotItem = self.getPlotItem()
         self.thisViewBox = self.thisPlotItem.getViewBox()
         self.initializePlot()
+
+    def updateMargins(self, x_center):
+        """Sets and update the margins of the view."""
+        self.xmin = x_center - self.xLowRange
+        self.xmax = x_center + self.xHighRange
 
     def initializePlot(self):
         # if self.length is None:
@@ -42,7 +62,7 @@ class myPlotWidget(pg.PlotWidget):
         Handles the tick signal received from a phonon.MediaObject to keep
         the plot in sync with the reproduction.
         """
-        xmin = tick - self.semiInterval
-        xmax = tick + self.semiInterval
-        self.thisViewBox.setRange(xRange=(xmin/1000.,xmax/1000.))
-        self.vertLine.setValue(tick/1000.)
+        self.curTime = tick
+        self.updateMargins(self.curTime)
+        self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
+        self.vertLine.setValue(self.curTime/1000.)
