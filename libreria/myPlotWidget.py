@@ -1,5 +1,16 @@
 import pyqtgraph as pg
 import numpy as np
+import mvpl
+
+# Import the data
+time, data = mvpl.readDataFile("fileStore/VELA012.TXT")
+x_data = np.array(data['time'])
+x_data = x_data - x_data[0]
+y_data = np.array(data['roll'])
+
+def rollCurve(x_array):
+    """Returns the roll values. Ignores the request and send everything altogether."""
+    return x_data/1000., y_data
 
 def myCurve(x_array):
     """ A dummy curve to plot (a sine):
@@ -59,7 +70,7 @@ class myPlotWidget(pg.PlotWidget):
         # The curve to be plotted. Simply put a function that takes an interval
         # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
         # seconds and it should work.
-        self.Curve = myCurve
+        self.Curve = rollCurve
 
         # Initialize the plot if length is defined
         if self.length is not None:
@@ -91,7 +102,7 @@ class myPlotWidget(pg.PlotWidget):
             xstart = self.xmin
         else:
             xstart = self.xMaxPlotted
-        if xstart > xmax:
+        if xmax - xstart < 250:
             return None
         interval = range(xstart,xmax,250)
 
@@ -107,7 +118,7 @@ class myPlotWidget(pg.PlotWidget):
         interval = np.array(interval)
         x, y = self.Curve(interval)
         self.plot(x,y)
-        self.xMaxPlotted = xmax
+        self.xMaxPlotted = int(x[-1]*1000)
 
     def totalTimeChangedHandler(self, newTotalTime):
         self.updatePlot(newTotalTime)
