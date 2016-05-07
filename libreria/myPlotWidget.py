@@ -32,11 +32,17 @@ class myPlotWidget(pg.PlotWidget):
 
         self.updateMargins(self.curTime)
         self.semiInterval = 2500
+        self.xMaxPlotted = None # this variable will keep track of what we've
+                                # plotted up to now
         # We get the PlotItem associated in order to modify the plot, e.g
         # add the vertical line in tickHandler.
         self.thisPlotItem = self.getPlotItem()
         self.thisViewBox = self.thisPlotItem.getViewBox()
-        self.initializePlot()
+        self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
+
+        # Initialize the plot if length is defined
+        if self.length is not None:
+            self.updatePlot(self.length)
 
     def updateMargins(self, x_center):
         """Sets and update the margins of the view."""
@@ -56,6 +62,22 @@ class myPlotWidget(pg.PlotWidget):
         self.thisViewBox.setRange(xRange=(-self.semiInterval/1000.,self.semiInterval/1000.))
         self.vertLine = self.thisPlotItem.addLine(0.,movable=True)
 
+    def updatePlot(self, xmax):
+        """Update the Plot up to xmax."""
+        # FIXME: somehow it doesn't plot a line right after the first plot (when
+        # xstart = self.xmin). Try and fix it.
+        if self.xMaxPlotted is None:
+            xstart = self.xmin
+        else:
+            xstart = self.xMaxPlotted
+        if xstart > xmax:
+            return None
+        x = np.arange(xstart,xmax,250)
+        y = myCurve(x)
+        x = x/1000.
+        self.plot(x,y)
+        self.xMaxPlotted = xmax
+
     def tickHandler(self, tick):
         """
         Connect this slot with a phonon.MediaObject.tick signal.
@@ -64,5 +86,6 @@ class myPlotWidget(pg.PlotWidget):
         """
         self.curTime = tick
         self.updateMargins(self.curTime)
+        self.updatePlot(self.xmax)
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
         self.vertLine.setValue(self.curTime/1000.)
