@@ -86,7 +86,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.lcdTime.display(time.strftime("%H"+":"+"%M"+":"+"%S"))
 		#plot set
 		self.ui.infusionPlot.addWidget(self.infCanv)
-		
+
 		"""
 		WORKING ZONE, PORTING TO PYQTGRAPH
 		"""
@@ -101,7 +101,7 @@ class MainWindow(QtGui.QMainWindow):
 		"""
 		END WORKING ZONE
 		"""
-		
+
 		#set video analysis
 		self.video.setMinimumSize(400,400)
 		self.ui.videoLayout.addWidget(self.video)
@@ -133,6 +133,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
 		self.media.stateChanged.connect(self.handleStateChanged)
 		self.media.tick.connect(self.plotter.tickHandler)
+		self.media.totalTimeChanged.connect(self.plotter.totalTimeChangedHandler)
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))

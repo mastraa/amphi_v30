@@ -16,8 +16,6 @@ class myPlotWidget(pg.PlotWidget):
     """Extend the class pyqtgraph.PlotWidget to serve our purposes.
     TODO: add an argument `datafile` so that when the instance is created it
         loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
-    TODO: add a totalTimeChangedHandler, so that, when we know the size of the
-        media file we can plot the remaining figure at once.
     """
     def __init__(self, *args, **kwargs):
         """Get optional parameters:
@@ -45,6 +43,9 @@ class myPlotWidget(pg.PlotWidget):
         self.thisPlotItem = self.getPlotItem()
         self.thisViewBox = self.thisPlotItem.getViewBox()
         self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
+
+        # Set the view at the beginning
+        self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
 
         # The curve to be plotted. Simply put a function that takes an interval
         # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
@@ -98,6 +99,9 @@ class myPlotWidget(pg.PlotWidget):
         x, y = self.Curve(interval)
         self.plot(x,y)
         self.xMaxPlotted = xmax
+
+    def totalTimeChangedHandler(self, newTotalTime):
+        self.updatePlot(newTotalTime)
 
     def tickHandler(self, tick):
         """
