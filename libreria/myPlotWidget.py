@@ -83,7 +83,18 @@ class myPlotWidget(pg.PlotWidget):
             xstart = self.xMaxPlotted
         if xstart > xmax:
             return None
-        interval = np.arange(xstart,xmax,250)
+        interval = range(xstart,xmax,250)
+
+        # Ensures the interval contains xmax
+        # FIXME: This code might be useless after a couple of iteration.
+        try:
+            range_test = interval[-1] < max
+        except:
+            range_test = False
+        if range_test:
+            interval.append(xmax)
+
+        interval = np.array(interval)
         x, y = self.Curve(interval)
         self.plot(x,y)
         self.xMaxPlotted = xmax
