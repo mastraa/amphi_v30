@@ -18,10 +18,11 @@ class myPlotWidget(pg.PlotWidget):
         self.initializePlot()
 
     def initializePlot(self):
-        if self.length is None:
-            t_end = 600000
-        else:
-            t_end = self.length
+        # if self.length is None:
+        #     t_end = 600000
+        # else:
+        #     t_end = self.length
+        t_end = 600000
         x = np.arange(-self.semiInterval, t_end + self.semiInterval,250)
         y = np.sin(x*np.pi/self.period)
         x = x/1000. #put x in seconds
