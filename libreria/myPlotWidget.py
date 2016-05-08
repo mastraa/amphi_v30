@@ -44,6 +44,8 @@ class myPlotWidget(pg.PlotWidget):
                 [ current_time - xLowRange, current_time + xHighRange ]
             xLowRange: as before
             xStartTime: ?
+            plotCurve: a function that takes input the required millis and outputs
+                the curve in [x_array, y_array] format.
             plotType: TODO planned feature, to tell the widget whether to plot
                 everything at the begging or plot as we go or something else.
                 Not used right now.
@@ -52,6 +54,12 @@ class myPlotWidget(pg.PlotWidget):
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
         self.curTime = kwargs.pop('xStartTime',0)
+
+        # The curve to be plotted. Simply put a function that takes an interval
+        # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
+        # seconds and it should work.
+        self.Curve = kwargs.pop('plotCurve',myCurve)
+
         super(myPlotWidget, self).__init__(*args,**kwargs)
 
         self.updateMargins(self.curTime)
@@ -66,11 +74,6 @@ class myPlotWidget(pg.PlotWidget):
 
         # Set the view at the beginning
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
-
-        # The curve to be plotted. Simply put a function that takes an interval
-        # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
-        # seconds and it should work.
-        self.Curve = rollCurve
 
         # Initialize the plot if length is defined
         if self.length is not None:
