@@ -190,7 +190,6 @@ def readDataFile(file,fileType=None):
         for i in range(1,len(values)):
         	try:
         		data[temp[a]].append(int(values[i]))#try to save as a int
-        		print temp[a], values[i]
         		a=a+1
         		#ValueError occur when data from text is a label or when it is a floating point number
         		#Index error occur when label is written in the last position (label list of amphi is shorter)

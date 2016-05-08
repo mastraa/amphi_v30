@@ -57,11 +57,11 @@ class MainWindow(QtGui.QMainWindow):
 		self.icons={'status':['/img/redLed.png', '/img/greenLed.png', '/img/whiteLed.png']} #set path to led color
 
 		self.media=Phonon.MediaObject(self)
-		self.media.setTickInterval(250)
+		self.media.setTickInterval(250) #set tick video interval
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
-		self.plotter = myPlotWidget() #Add a graph plotter
+		self.plotVideoAnalysis_1 = myPlotWidget('roll') #Add a graph plotter
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
@@ -122,7 +122,7 @@ class MainWindow(QtGui.QMainWindow):
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
 		#Plot
-		self.ui.plotVideoLayout.addWidget(self.plotter)
+		self.ui.plotVideoLayout.addWidget(self.plotVideoAnalysis_1)#video analysis plotter
 
 	def functionConnect(self):
 		"""
@@ -132,8 +132,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.addValueButton.clicked.connect(self.addBaud)
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
 		self.media.stateChanged.connect(self.handleStateChanged)
-		self.media.tick.connect(self.plotter.tickHandler)
-		self.media.totalTimeChanged.connect(self.plotter.totalTimeChangedHandler)
+		self.media.tick.connect(self.plotVideoAnalysis_1.tickHandler)#mediaObject signal
+		self.media.totalTimeChanged.connect(self.plotVideoAnalysis_1.totalTimeChangedHandler)#mediaObject signal
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))

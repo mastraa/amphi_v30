@@ -5,7 +5,7 @@ import mvpl
 # Import the data
 time, data = mvpl.readDataFile("fileStore/VELA012.TXT")
 x_data = np.array(data['time'])
-x_data = x_data - x_data[0]
+x_data = x_data - x_data[0]#relative time
 y_data = np.array(data['roll'])
 
 def rollCurve(x_array):
@@ -37,7 +37,7 @@ class myPlotWidget(pg.PlotWidget):
     TODO: add an argument `datafile` so that when the instance is created it
         loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self,label, *args, **kwargs):
         """Get optional parameters:
             length: length of the media file
             xHighRange: upper semiInterval to be shown, i.e. we will plot
@@ -48,6 +48,7 @@ class myPlotWidget(pg.PlotWidget):
                 everything at the begging or plot as we go or something else.
                 Not used right now.
         """
+        print label
         self.length = kwargs.pop('length',None)
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
@@ -88,14 +89,16 @@ class myPlotWidget(pg.PlotWidget):
         #     t_end = self.length
         t_end = 600000
         x = np.arange(-self.semiInterval, t_end + self.semiInterval,250)
-        y = myCurve(x)
+        y = rollCurve(x)
         x = x/1000. #put x in seconds
         self.plot(x,y)
         self.thisViewBox.setRange(xRange=(-self.semiInterval/1000.,self.semiInterval/1000.))
         self.vertLine = self.thisPlotItem.addLine(0.,movable=True)
 
     def updatePlot(self, xmax):
-        """Update the Plot up to xmax."""
+        """Update the Plot up to xmax.
+        It will only update the x position, graph is entirely plotted at the beginning
+        """
         # FIXME: somehow it doesn't plot a line right after the first plot (when
         # xstart = self.xmin). Try and fix it.
         if self.xMaxPlotted is None:
