@@ -36,11 +36,18 @@ x_data = np.array(data['time'])
 x_data = x_data - x_data[0]#relative time
 y_data = np.array(data['roll'])
 
-def rollCurve(x_array):
+def rollCurve(x_array,label):
     """Returns the roll values. Ignores the request and send everything altogether."""
     return x_data/1000., y_data
 
-def myCurve(x_array):
+def customCurve(x_array,label):
+    """Returns the roll values. Ignores the request and send everything altogether."""
+    if label:
+        return x_data/1000., np.array(data[label])
+    else:
+        return x_array/1000., np.sin(x_array*np.pi/period)
+    
+def myCurve(x_array,label):
     """ A dummy curve to plot (a sine):
         x_array: array of time values in milliseconds
         Returns:
@@ -82,7 +89,6 @@ class myPlotWidget(pg.PlotWidget):
                 Not used right now.
         """
         self.label = kwargs.pop('label',None)
-        print self.label
         self.length = kwargs.pop('length',None)
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
@@ -144,7 +150,7 @@ class myPlotWidget(pg.PlotWidget):
             interval.append(xmax)
 
         interval = np.array(interval)
-        x, y = self.Curve(interval)
+        x, y = self.Curve(interval, self.label)
         self.plot(x,y)
         self.xMaxPlotted = int(x[-1]*1000)
 

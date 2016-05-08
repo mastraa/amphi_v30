@@ -26,10 +26,10 @@ def pathDefine(i):
 		sys.path.append('libreria')
 	return path
 
-guiPath=pathDefine(0) #1:terminal 0:exe
+guiPath=pathDefine(1) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
-from myPlotWidget import myPlotWidget, rollCurve
+from myPlotWidget import myPlotWidget, rollCurve, customCurve
 
 #global definition
 gui = "/MainGui.ui"
@@ -61,8 +61,10 @@ class MainWindow(QtGui.QMainWindow):
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
-
-		self.plotVideoAnalysis_1 = myPlotWidget(label='roll',plotCurve=rollCurve) #Add a graph plotter
+		self.plotVideoAnalysis=[]
+		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='roll')) #Add a graph plotter
+		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='pitch')) #Add a graph plotter
+		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='yaw')) #Add a graph plotter
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
@@ -122,8 +124,9 @@ class MainWindow(QtGui.QMainWindow):
 		#init led status
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
-		#Plot
-		self.ui.plotVideoLayout.addWidget(self.plotVideoAnalysis_1)#video analysis plotter
+		#Data Analysis plot
+		for item in self.plotVideoAnalysis:
+			self.ui.plotVideoLayout.addWidget(item)
 
 	def functionConnect(self):
 		"""
@@ -133,8 +136,11 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.addValueButton.clicked.connect(self.addBaud)
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
 		self.media.stateChanged.connect(self.handleStateChanged)
-		self.media.tick.connect(self.plotVideoAnalysis_1.tickHandler)#mediaObject signal
-		self.media.totalTimeChanged.connect(self.plotVideoAnalysis_1.totalTimeChangedHandler)#mediaObject signal
+
+		for item in self.plotVideoAnalysis:
+			self.media.tick.connect(item.tickHandler)
+			self.media.totalTimeChanged.connect(item.totalTimeChangedHandler)#mediaObject signal
+
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
