@@ -26,7 +26,7 @@ def pathDefine(i):
 		sys.path.append('libreria')
 	return path
 
-guiPath=pathDefine(1) #1:terminal 0:exe
+guiPath=pathDefine(0) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
 from myPlotWidget import myPlotWidget
