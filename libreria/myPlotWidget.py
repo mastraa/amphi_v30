@@ -68,7 +68,7 @@ class myPlotWidget(pg.PlotWidget):
     TODO: add an argument `datafile` so that when the instance is created it
         loads the data from a specific file, i.e. `fileStore/VELA012.TXT`.
     """
-    def __init__(self,label, *args, **kwargs):
+    def __init__(self,*args, **kwargs):
         """Get optional parameters:
             length: length of the media file
             xHighRange: upper semiInterval to be shown, i.e. we will plot
@@ -81,6 +81,7 @@ class myPlotWidget(pg.PlotWidget):
                 everything at the begging or plot as we go or something else.
                 Not used right now.
         """
+        self.label = kwargs.pop('label',None)
         print label
         self.length = kwargs.pop('length',None)
         self.xHighRange = kwargs.pop('xHighRange',2500)

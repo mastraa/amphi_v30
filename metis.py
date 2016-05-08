@@ -62,7 +62,7 @@ class MainWindow(QtGui.QMainWindow):
 		Phonon.createPath(self.media,self.video)
 
 
-		self.plotVideoAnalysis_1 = myPlotWidget('roll',plotCurve=rollCurve) #Add a graph plotter
+		self.plotVideoAnalysis_1 = myPlotWidget(label='roll',plotCurve=rollCurve) #Add a graph plotter
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
