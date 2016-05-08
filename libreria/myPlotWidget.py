@@ -82,7 +82,7 @@ class myPlotWidget(pg.PlotWidget):
                 Not used right now.
         """
         self.label = kwargs.pop('label',None)
-        print label
+        print self.label
         self.length = kwargs.pop('length',None)
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
@@ -117,21 +117,6 @@ class myPlotWidget(pg.PlotWidget):
         self.xmin = x_center - self.xLowRange
         self.xmax = x_center + self.xHighRange
 
-    def initializePlot(self):
-        # TODO: remove this method.
-
-        # Legacy code:
-        # if self.length is None:
-        #     t_end = 600000
-        # else:
-        #     t_end = self.length
-        t_end = 600000
-        x = np.arange(-self.semiInterval, t_end + self.semiInterval,250)
-        y = rollCurve(x)
-        x = x/1000. #put x in seconds
-        self.plot(x,y)
-        self.thisViewBox.setRange(xRange=(-self.semiInterval/1000.,self.semiInterval/1000.))
-        self.vertLine = self.thisPlotItem.addLine(0.,movable=True)
 
     def updatePlot(self, xmax):
 
