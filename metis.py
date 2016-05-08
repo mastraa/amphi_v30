@@ -93,12 +93,20 @@ class MainWindow(QtGui.QMainWindow):
 		"""
 		WORKING ZONE, PORTING TO PYQTGRAPH
 		"""
+		self.telPlot=[]
+		self.telPlot.append(myPlotWidget(label=['roll','pitch'],tipology='static'))
+		self.telPlot.append(myPlotWidget(label='yaw',tipology='static'))
+
+		for item in self.telPlot:
+			self.ui.telPlotLayout.addWidget(item)
+
 		#self.ui.telPlot.addWidget(self.telCanv)
 		self.rollPitchPlot=pg.PlotWidget(name='RollPitch')
-		self.ui.telPlot.addWidget(self.rollPitchPlot)
+		self.rollPitchPlot.setLabel('top', 'titolo')
+		self.ui.telPlotLayout.addWidget(self.rollPitchPlot)
 		self.rollPitchPlot.show()
 		self.YawScarPlot=pg.PlotWidget(name='YawScar')
-		self.ui.telPlot.addWidget(self.YawScarPlot)
+		self.ui.telPlotLayout.addWidget(self.YawScarPlot)
 		self.YawScarPlot.show()
 		guiLib.plotter([self.rollPitchPlot,self.YawScarPlot],[[[0,1,2],[[2,3,4],[1,2,3]]],[[2,3,4],[3,6,9]]])
 		"""
@@ -208,6 +216,10 @@ class MainWindow(QtGui.QMainWindow):
 					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])#...and change led status color
 				mvpl.storeData(self.data, result, mvpl.NMEA)
 				self.telemetryView()
+				"""porting to pyqtgraph: telemetry functions
+				"""
+				for item in self.telPlot:
+					item.staticPlot(self.data)
 
 	def oneHertz(self, time): #activate at one hertz
 		self.ui.lcdTime.display(time)# print time on digital clock

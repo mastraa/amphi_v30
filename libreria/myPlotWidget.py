@@ -93,6 +93,7 @@ class myPlotWidget(pg.PlotWidget):
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
         self.curTime = kwargs.pop('xStartTime',0)
+        self.tipology = kwargs.pop('tipology','moving')
 
         # The curve to be plotted. Simply put a function that takes an interval
         # [xmin, xmax] in milliseconds and returns an array [x,f(x)] with x in
@@ -109,7 +110,10 @@ class myPlotWidget(pg.PlotWidget):
         # add the vertical line in tickHandler.
         self.thisPlotItem = self.getPlotItem()
         self.thisViewBox = self.thisPlotItem.getViewBox()
-        self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
+        if self.tipology == 'static':
+            pass
+        else:
+            self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
 
         # Set the view at the beginning
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
@@ -168,3 +172,22 @@ class myPlotWidget(pg.PlotWidget):
         self.updatePlot(self.xmax)
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
         self.vertLine.setValue(self.curTime/1000.)
+
+    def staticPlot(self, data):
+        """
+        Function to plot telemetry data during reception
+        Where widget has multiple plot it uses multiple color
+
+        TODO: set labels, title, legends
+        """
+        self.clear()
+        color=[(255,0,0),(0,255,0),(0,0,255),(255,255,255),(200,150,150)]
+        if isinstance(self.label,list):#there are more than one data to plot here
+            for i in range(len(self.label)):#we need more color
+                self.plot(data['times'][-25:],data[self.label[i]][-25:], pen=color[i])
+        else:
+            self.plot(data['times'][-25:],data[self.label][-25:],pen=color[0])
+        try:
+            self.setXRange(data['times'][-25],data['times'][-1])
+        except IndexError:#not yet enough data
+            self.setXRange(data['times'][0],data['times'][-1])
