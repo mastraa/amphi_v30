@@ -46,7 +46,7 @@ def customCurve(x_array,label):
         return x_data/1000., np.array(data[label])
     else:
         return x_array/1000., np.sin(x_array*np.pi/period)
-    
+
 def myCurve(x_array,label):
     """ A dummy curve to plot (a sine):
         x_array: array of time values in milliseconds
@@ -112,6 +112,8 @@ class myPlotWidget(pg.PlotWidget):
         self.thisViewBox = self.thisPlotItem.getViewBox()
         if self.tipology == 'static':
             pass
+            # TODO: The proper way to avoid the view to move it so add
+            # a test in tickHandler.
         else:
             self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
 
@@ -133,8 +135,6 @@ class myPlotWidget(pg.PlotWidget):
         """Update the Plot up to xmax.
         It will only update the x position, graph is entirely plotted at the beginning
         """
-        # FIXME: somehow it doesn't plot a line right after the first plot (when
-        # xstart = self.xmin). Try and fix it.
 
         if self.xMaxPlotted is None:
             xstart = self.xmin
@@ -167,9 +167,17 @@ class myPlotWidget(pg.PlotWidget):
         Handles the tick signal received from a phonon.MediaObject to keep
         the plot in sync with the reproduction.
         """
+
+        # Set the current time to the tick signal received and update the margins
+        # of the view and the plot.
         self.curTime = tick
         self.updateMargins(self.curTime)
         self.updatePlot(self.xmax)
+
+        # Move the view according to the new margins and set the vertical line
+        # to the current time.
+        # TODO: to avoid the moving windows, add a test here:
+        #if self.tiplogy == 'moving':
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
         self.vertLine.setValue(self.curTime/1000.)
 
