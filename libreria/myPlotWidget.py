@@ -41,7 +41,11 @@ def rollCurve(x_array,label):
     return x_data/1000., y_data
 
 def customCurve(x_array,label):
-    """Returns the roll values. Ignores the request and send everything altogether."""
+    """
+    Returns the roll values. Ignores the request and send everything altogether.
+    TODO: unify usage of label, use myPlotWidget attr instead of passed parameter
+    we can modify data plotted using labelMod() function
+    """
     if label:
         return x_data/1000., np.array(data[label])
     else:
@@ -88,7 +92,7 @@ class myPlotWidget(pg.PlotWidget):
                 everything at the begging or plot as we go or something else.
                 Not used right now.
         """
-        self.label = kwargs.pop('label',None)
+        self.label = kwargs.pop('label',None) #it leads the plotted data and legend in static function
         self.length = kwargs.pop('length',None)
         self.xHighRange = kwargs.pop('xHighRange',2500)
         self.xLowRange = kwargs.pop('xLowRange',2500)
@@ -128,7 +132,6 @@ class myPlotWidget(pg.PlotWidget):
         """Sets and update the margins of the view."""
         self.xmin = x_center - self.xLowRange
         self.xmax = x_center + self.xHighRange
-
 
     def updatePlot(self, xmax):
 
@@ -181,22 +184,33 @@ class myPlotWidget(pg.PlotWidget):
         self.thisViewBox.setRange(xRange=(self.xmin/1000.,self.xmax/1000.))
         self.vertLine.setValue(self.curTime/1000.)
 
-    def staticPlot(self, data):
+    def staticPlot(self, data, n = 25):
         """
         Function to plot telemetry data during reception
         Where widget has multiple plot it uses multiple color
+        n: number of data to plot (from last row incame)
 
-        TODO: set labels, title, legends
+        TODO: set labels, title
         """
         self.clear()
         self.addLegend()
         color=[(255,0,0),(0,255,0),(0,0,255),(255,255,255),(200,150,150)]
         if isinstance(self.label,list):#there are more than one data to plot here
             for i in range(len(self.label)):#we need more color
-                self.plot(data['times'][-25:],data[self.label[i]][-25:], pen=color[i],name=self.label[i])
+                self.plot(data['times'][-n:],data[self.label[i]][-n:], pen=color[i],name=self.label[i])
         else:
-            self.plot(data['times'][-25:],data[self.label][-25:],pen=color[0],name=self.label)
+            self.plot(data['times'][-n:],data[self.label][-n:],pen=color[0],name=self.label)
         try:
-            self.setXRange(data['times'][-25],data['times'][-1])
+            self.setXRange(data['times'][-n],data['times'][-1])
         except IndexError:#not yet enough data
             self.setXRange(data['times'][0],data['times'][-1])
+
+    def labelMod(self, newLabel):
+        """
+        Modify label, newLabel can be a string list to
+        It clear the widget
+        """
+        self.clear()
+        self.label=newLabel
+
+

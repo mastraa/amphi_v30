@@ -233,14 +233,18 @@ class MainWindow(QtGui.QMainWindow):
 		create PlotWidget list for real time data
 		set for the widget the correct label
 		set the widget in the correct QLayout
+
 		TODO: now it has only implementation for telemetry view, extend to other incoming data type
 		"""
 		self.realTimePlot=[]
-		self.realTimePlot.append(myPlotWidget(label=['roll','pitch'],tipology='static'))
-		self.realTimePlot.append(myPlotWidget(label=['scarroccio','gradi'],tipology='static'))
+		self.realTimePlot.append(myPlotWidget(tipology='static'))
+		self.realTimePlot.append(myPlotWidget(tipology='static'))
 
-		for item in self.realTimePlot:
-			self.ui.telPlotLayout.addWidget(item)
+		if self.data['tipo']==7:
+			self.realTimePlot[0].labelMod(['roll','pitch'])
+			self.realTimePlot[1].labelMod(['scarroccio','gradi'])
+			for item in self.realTimePlot:
+				self.ui.telPlotLayout.addWidget(item)
 
 	def realTimeView(self):
 		mvpl.postProcData(self.data)
