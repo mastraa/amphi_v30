@@ -79,55 +79,24 @@ def storeData(buff, data, NMEAType):#for every iteration store last income data 
 			buff[NMEAType[tipo][1][i]].append(data[i])
 		i=i+1
 
-def plot(data, extraData, figure, monitor, n):
+def postProcData(data):
 	"""
-	Plot graph
-	data: dictionary with all data stored
-	extraData: disctionary with some data created in post proc
-	figure & monitor: space to plot
-	n: number of data to plot
-
-	this function must be review!!!
+	process income data and add some new derived data
 	"""
 	if data['tipo']==7:
-		figura=figure['telemetria'][0]
-		canvas=figure['telemetria'][1]
 		roll, pitch, yaw, time, gradi=data['roll'],data['pitch'],data['yaw'],data['times'], data['gradi']
+		#yaw income with fullscale +/-180, course from gps has fullscale 0/360
 		if yaw[-1]<0:
 			rot=-yaw[-1]
 		else:
 			rot=360-yaw[-1]
-		try:
-			extraData['scarroccio'].append(abs(gradi[-1]-rot))
+		try:#first call
+			data['scarroccio']
 		except KeyError:
-			extraData['scarroccio']=[]
-			extraData['scarroccio'].append(abs(gradi[-1]-rot))
-		figura.clf()
-
-		plot_1=figura.add_subplot(311)
-		plot_1.plot(time[-n:],roll[-n:], label="roll")
-		plot_1.plot(time[-n:],pitch[-n:], label="pitch")
-		plot_1.legend(loc="upper left")
-		plot_1.grid()
-
-		plot_2=figura.add_subplot(312)
-		plot_2.plot(time[-n:],yaw[-n:], label="yaw")
-		plot_2.plot(time[-n:], gradi[-n:], label="course")
-		plot_2.legend(loc="upper left")
-		plot_2.grid()
-
-		plot_3=figura.add_subplot(313)
-		plot_3.plot(time[-n:], extraData['scarroccio'][-n:], label="scarr")
-		plot_3.legend(loc="upper left")
-		plot_3.set_xlabel('time[s]')
-		plot_3.grid()
-
-		canvas.draw()
-
-		monitor[0].display(data['roll'][-1])
-		monitor[1].display(data['pitch'][-1])
-		monitor[2].display(data['yaw'][-1])
-		monitor[3].display(extraData['scarroccio'][-1])
+			data['scarroccio']=[]
+		data['scarroccio'].append(abs(gradi[-1]-rot))
+	elif data['tipo']=='$MVUP':
+		print '$MVUP'
 
 def Save(filename, data, NMEAType):
 	"""

@@ -189,12 +189,13 @@ class myPlotWidget(pg.PlotWidget):
         TODO: set labels, title, legends
         """
         self.clear()
+        self.addLegend()
         color=[(255,0,0),(0,255,0),(0,0,255),(255,255,255),(200,150,150)]
         if isinstance(self.label,list):#there are more than one data to plot here
             for i in range(len(self.label)):#we need more color
-                self.plot(data['times'][-25:],data[self.label[i]][-25:], pen=color[i])
+                self.plot(data['times'][-25:],data[self.label[i]][-25:], pen=color[i],name=self.label[i])
         else:
-            self.plot(data['times'][-25:],data[self.label][-25:],pen=color[0])
+            self.plot(data['times'][-25:],data[self.label][-25:],pen=color[0],name=self.label)
         try:
             self.setXRange(data['times'][-25],data['times'][-1])
         except IndexError:#not yet enough data

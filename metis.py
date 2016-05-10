@@ -91,27 +91,9 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.infusionPlot.addWidget(self.infCanv)
 
 		"""
-		WORKING ZONE, PORTING TO PYQTGRAPH
+		TODO: substitute telPlot list with a generic realTime list to use with all real time income data
 		"""
-		self.telPlot=[]
-		self.telPlot.append(myPlotWidget(label=['roll','pitch'],tipology='static'))
-		self.telPlot.append(myPlotWidget(label='yaw',tipology='static'))
-
-		for item in self.telPlot:
-			self.ui.telPlotLayout.addWidget(item)
-
-		#self.ui.telPlot.addWidget(self.telCanv)
-		self.rollPitchPlot=pg.PlotWidget(name='RollPitch')
-		self.rollPitchPlot.setLabel('top', 'titolo')
-		self.ui.telPlotLayout.addWidget(self.rollPitchPlot)
-		self.rollPitchPlot.show()
-		self.YawScarPlot=pg.PlotWidget(name='YawScar')
-		self.ui.telPlotLayout.addWidget(self.YawScarPlot)
-		self.YawScarPlot.show()
-		guiLib.plotter([self.rollPitchPlot,self.YawScarPlot],[[[0,1,2],[[2,3,4],[1,2,3]]],[[2,3,4],[3,6,9]]])
-		"""
-		END WORKING ZONE
-		"""
+		
 
 		#set video analysis
 		self.video.setMinimumSize(400,400)
@@ -211,15 +193,13 @@ class MainWindow(QtGui.QMainWindow):
 				self.ui.receivedText.appendPlainText(self.time+": "+str(result[0]))
 				if len(self.data)==0:#if it is first data arrived
 					self.data=mvpl.createDataStorage(result[0])#create data storage, giving type byte
+					self.createPlotWidget()
 				if self.dataStatus == 0: #if dataStatus is setted false...
 					self.dataStatus = 1 #...reset it...
 					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])#...and change led status color
 				mvpl.storeData(self.data, result, mvpl.NMEA)
-				self.telemetryView()
-				"""porting to pyqtgraph: telemetry functions
-				"""
-				for item in self.telPlot:
-					item.staticPlot(self.data)
+				self.realTimeView()#show data in telemetry section
+				
 
 	def oneHertz(self, time): #activate at one hertz
 		self.ui.lcdTime.display(time)# print time on digital clock
@@ -248,9 +228,25 @@ class MainWindow(QtGui.QMainWindow):
 			if fileName:
 				mvpl.Save(fileName, self.data, mvpl.NMEA)
 
-	def telemetryView(self):
-		mvpl.plot(self.data, self.extraData, self.grafici, self.heading, 25)
+	def createPlotWidget(self):
+		"""
+		create PlotWidget list for real time data
+		set for the widget the correct label
+		set the widget in the correct QLayout
+		TODO: now it has only implementation for telemetry view, extend to other incoming data type
+		"""
+		self.realTimePlot=[]
+		self.realTimePlot.append(myPlotWidget(label=['roll','pitch'],tipology='static'))
+		self.realTimePlot.append(myPlotWidget(label=['scarroccio','gradi'],tipology='static'))
+
+		for item in self.realTimePlot:
+			self.ui.telPlotLayout.addWidget(item)
+
+	def realTimeView(self):
+		mvpl.postProcData(self.data)
 		mvpl.windView(self.wind, guiPath+'/img/', self.data)
+		for item in self.realTimePlot:
+			item.staticPlot(self.data)
 
 	def handleStateChanged(self):
 		pass
