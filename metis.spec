@@ -2,7 +2,8 @@
 
 block_cipher = None
 
-
+# hiddenimports = collect_submodules('pkg_resources._vendor')
+hiddenimports=['six','packaging', 'packaging.version', 'packaging.specifiers']
 
 a = Analysis(['metis.py'],
              pathex=['/Users/mastraa/Desktop/1001Vela/6000/Emessi/6024_ProgrammiDecodifica/amphi_v30'],

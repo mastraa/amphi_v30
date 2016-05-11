@@ -277,6 +277,6 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-app = QtGui.QApplication(sys.argv)
+app =QtGui.QApplication(sys.argv)
 window=MainWindow()
 sys.exit(app.exec_())
