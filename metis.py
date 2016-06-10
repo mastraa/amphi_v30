@@ -248,7 +248,10 @@ class MainWindow(QtGui.QMainWindow):
 
 	def realTimeView(self):
 		mvpl.postProcData(self.data)
-		mvpl.windView(self.wind, guiPath+'/img/', self.data)
+		monitor=[]
+		monitor.extend(self.wind)
+		monitor.extend(self.heading)
+		mvpl.cockpitView(monitor, guiPath+'/img/', self.data)
 		for item in self.realTimePlot:
 			item.staticPlot(self.data)
 

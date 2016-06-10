@@ -117,7 +117,7 @@ def Save(filename, data, NMEAType):
 		file.write('\n')#new line
 	file.close()
 
-def windView(monitor, path, data):
+def cockpitView(monitor, path, data):
 	background = QtGui.QPixmap(path+'segna.png')
 	item=monitor[0].addPixmap(background)
 	monitor[1].fitInView(item)
@@ -132,6 +132,10 @@ def windView(monitor, path, data):
 	monitor[1].show()
 	monitor[2].display(data['wdir_1'][-1])
 	monitor[3].display(data['wspeed'][-1])
+	monitor[5].display(data['roll'][-1])
+	monitor[6].display(data['pitch'][-1])
+	monitor[7].display(data['yaw'][-1])
+	monitor[8].display(data['scarroccio'][-1])
 
 def readDataFile(file,fileType=None):
     """

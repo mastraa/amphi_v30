@@ -64,6 +64,13 @@ def myCurve(x_array,label):
 
 # END EXAMPLES
 
+class Curve(object):
+    def __init__(self, *args, **kwargs):
+        self.data = kwargs.pop('data',[])
+
+    def __call__(self, x_array, label):
+        pass
+
 # The Widget. This is production ready.
 class myPlotWidget(pg.PlotWidget):
     """Extend the class pyqtgraph.PlotWidget to serve our purposes. If initialized
