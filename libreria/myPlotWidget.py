@@ -22,6 +22,7 @@ Conventions:
 - The curve function should use only the first and last elements of the time
     interval. In the future the Widget will only pass [ time_min, time_max ].
 """
+from PyQt4 import QtGui
 import pyqtgraph as pg
 import numpy as np
 import mvpl
@@ -64,12 +65,85 @@ def myCurve(x_array,label):
 
 # END EXAMPLES
 
+class plotDirector(object):
+    """A mediator objects that links the plotWidgets, the load buttons and the data."""
+    def __init__(self, *args, **kwargs):
+        self.labels = kwargs.pop('labels',[])
+        self.curves = kwargs.pop('curves',{})
+        self.plots = kwargs.pop('plotWidgets',{})
+
+        self.initializeLinks()
+
+    def initializeLinks(self):
+        """Connects each plot to its curve."""
+        for s_label in self.labels:
+            try:
+                self.plots[s_label].Curve = self.curves[s_label]
+            except:
+                pass
+        return self
+
+    def loadDataFile(self):
+        path=QtGui.QFileDialog.getOpenFileName(caption="Load Data File")
+        if path:
+            self.parseDataFile(path)
+        return self
+
+    def parseDataFile(self,path):
+        """Parse the datafile and set each data set to its appropriate curve."""
+        time, data = mvpl.readDataFile(path)
+        x_data = np.array(data['time'])
+        x_data = x_data - x_data[0]
+        for s_label in self.labels:
+            y_data = np.array(data[s_label])
+            try:
+                self.curves[s_label].loadData([x_data, y_data])
+            except:
+                pass
+        return self
+
+    def connectPlot(self, videoLayout):
+        """Connect the plot widgets to their layout."""
+        for s_label in self.labels:
+            try:
+                videoLayout.addWidget(self.plots[s_label])
+            except:
+                pass
+        return self
+
+    def tickHandler(self, tick):
+        for s_label in self.labels:
+            try:
+                self.plots[s_label].tickHandler(tick)
+            except:
+                pass
+
+    def totalTimeChangedHandler(self, newTotalTime):
+        for s_label in self.labels:
+            try:
+                self.plots[s_label].totalTimeChangedHandler(newTotalTime)
+            except:
+                pass
+
 class Curve(object):
     def __init__(self, *args, **kwargs):
-        self.data = kwargs.pop('data',[])
+        """A static curve.
+        Optional arguments:
+            data: as in Curve.loadData
+        """
+        self.data = kwargs.pop('data',[[],[]])
+        self.label = kwargs.pop('label',None)
 
-    def __call__(self, x_array, label):
-        pass
+    def __call__(self, x_array, *args, **kwargs):
+        """kwargs is to accept legacy labels."""
+        return self.data[0]/1000., self.data[1]
+
+    def loadData(self, data):
+        """Parameters:
+            data: Array [ x, y ] of all the points of the curve.
+        """
+        self.data = data
+        return self
 
 # The Widget. This is production ready.
 class myPlotWidget(pg.PlotWidget):
@@ -219,5 +293,3 @@ class myPlotWidget(pg.PlotWidget):
         """
         self.clear()
         self.label=newLabel
-
-

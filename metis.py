@@ -31,7 +31,7 @@ def pathDefine(i):
 guiPath=pathDefine(1) #1:terminal 0:exe
 
 import comLib, mvpl, guiLib
-from myPlotWidget import myPlotWidget, rollCurve, customCurve
+from myPlotWidget import myPlotWidget, rollCurve, customCurve, plotDirector, Curve
 
 #global definition
 gui = "/MainGui.ui"
@@ -63,10 +63,12 @@ class MainWindow(QtGui.QMainWindow):
 		self.video=Phonon.VideoWidget(self)
 		Phonon.createPath(self.media,self.video)
 
-		self.plotVideoAnalysis=[]
-		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='roll')) #Add a graph plotter
-		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='pitch')) #Add a graph plotter
-		self.plotVideoAnalysis.append(myPlotWidget(plotCurve=customCurve, label='yaw')) #Add a graph plotter
+		# Create the various plots
+		self.plotLabels = ['roll','pitch','yaw']
+		self.curves = { s_label: Curve(label=s_label) for s_label in self.plotLabels}
+		self.plotWidgets = { s_label: myPlotWidget(label='s_label') for s_label in self.plotLabels}
+		# The director takes care of linking everything among themselves
+		self.director = plotDirector(labels = self.plotLabels, curves=self.curves, plotWidgets=self.plotWidgets)
 
 		self.figureSet() #setting figures for plotting
 		self.guiSetting() #extra gui setting
@@ -117,8 +119,7 @@ class MainWindow(QtGui.QMainWindow):
 		guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][2])
 
 		#Data Analysis plot
-		for item in self.plotVideoAnalysis:
-			self.ui.plotVideoLayout.addWidget(item)
+		self.director.connectPlot(self.ui.plotVideoLayout)
 
 	def functionConnect(self):
 		"""
@@ -129,14 +130,17 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.ConnectionButton.clicked.connect(self.Connection)
 		self.media.stateChanged.connect(self.handleStateChanged)
 
-		for item in self.plotVideoAnalysis:
-			self.media.tick.connect(item.tickHandler)
-			self.media.totalTimeChanged.connect(item.totalTimeChangedHandler)#mediaObject signal
+		# Let the director handle the signals for the plotWidgets
+		self.media.tick.connect(self.director.tickHandler)
+		self.media.totalTimeChanged.connect(self.director.totalTimeChangedHandler)
 
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
 		self.ui.pauseVideo.clicked.connect(lambda:self.playVideo(0))
+
+		# Connect the data file loading
+		self.ui.LoadDataTxt.clicked.connect(self.director.loadDataFile)
 
 	def SerialCheck(self):
 		"""
