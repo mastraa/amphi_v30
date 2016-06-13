@@ -9,8 +9,10 @@ import sys, serial, time, struct, os
 from PyQt4 import QtCore, QtGui, uic
 from PyQt4.phonon import Phonon
 
+import matplotlib
+matplotlib.use("QT4Agg")
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import FigureCanvas
 import numpy as np
 import pyqtgraph as pg
 
@@ -93,7 +95,7 @@ class MainWindow(QtGui.QMainWindow):
 		"""
 		TODO: substitute telPlot list with a generic realTime list to use with all real time income data
 		"""
-		
+
 
 		#set video analysis
 		self.video.setMinimumSize(400,400)
@@ -199,7 +201,7 @@ class MainWindow(QtGui.QMainWindow):
 					guiLib.ImageToLabel(self.ui.connStatus, guiPath+self.icons['status'][1])#...and change led status color
 				mvpl.storeData(self.data, result, mvpl.NMEA)
 				self.realTimeView()#show data in telemetry section
-				
+
 
 	def oneHertz(self, time): #activate at one hertz
 		self.ui.lcdTime.display(time)# print time on digital clock
