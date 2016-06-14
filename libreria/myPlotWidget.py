@@ -67,10 +67,14 @@ def myCurve(x_array,label):
 
 class plotDirector(object):
     """A mediator objects that links the plotWidgets, the load buttons and the data."""
+    # TODO: describe how the director handles stuff
     def __init__(self, *args, **kwargs):
         self.labels = kwargs.pop('labels',[])
         self.curves = kwargs.pop('curves',{})
         self.plots = kwargs.pop('plotWidgets',{})
+
+        self.timeDelta = 0
+        self.newTimeDelta = 0
 
         self.initializeLinks()
 
@@ -124,6 +128,25 @@ class plotDirector(object):
                 self.plots[s_label].totalTimeChangedHandler(newTotalTime)
             except:
                 pass
+
+    def syncTextChangedHandler(self, newTimeString):
+        """Connects to the TimeSincTxt.timeChanged signal. The director knows at
+        any time what's written in the TimeSincTxt."""
+        # TODO: need to validate this input at some point
+        try:
+            self.newTimeDelta = int(newTimeString)
+        except:
+            pass
+
+    def syncTextConfirmHandler(self):
+        """When the OK button or the Enter key is pressed, proceed to the update
+        of the timeDelta in the curves."""
+        if self.newTimeDelta != self.timeDelta:
+            self.updateTimeDelta()
+
+    def updateTimeDelta(self):
+        # TODO: implement this method: tell the curves to change the origin.
+        pass
 
 class Curve(object):
     def __init__(self, *args, **kwargs):

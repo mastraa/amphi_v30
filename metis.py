@@ -134,6 +134,12 @@ class MainWindow(QtGui.QMainWindow):
 		self.media.tick.connect(self.director.tickHandler)
 		self.media.totalTimeChanged.connect(self.director.totalTimeChangedHandler)
 
+		# Connect TimeSincTxt and TimeSetOK to the director
+		self.ui.TimeSincTxt.textChanged.connect(self.director.syncTextChangedHandler)
+		self.ui.TimeSincTxt.textEdited.connect(self.director.syncTextChangedHandler)
+		self.ui.TimeSincTxt.returnPressed.connect(self.director.syncTextConfirmHandler)
+		self.ui.TimeSetOK.clicked.connect(self.director.syncTextConfirmHandler)
+
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))
