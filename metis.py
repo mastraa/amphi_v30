@@ -140,6 +140,9 @@ class MainWindow(QtGui.QMainWindow):
 		self.ui.TimeSincTxt.returnPressed.connect(self.director.syncTextConfirmHandler)
 		self.ui.TimeSetOK.clicked.connect(self.director.syncTextConfirmHandler)
 
+		# Add the button to the director
+		self.director.button = self.ui.TimeSetOK
+
 		self.ui.loadVideo.clicked.connect(self.handleButton)
 		self.ui.playVideo.clicked.connect(lambda:self.playVideo(1))
 		self.ui.stopVideo.clicked.connect(lambda:self.playVideo(2))

@@ -131,10 +131,17 @@ class plotDirector(object):
 
     def syncTextChangedHandler(self, newTimeString):
         """Connects to the TimeSincTxt.timeChanged signal. The director knows at
-        any time what's written in the TimeSincTxt."""
+        any time what's written in the TimeSincTxt. Shows in the button text
+        whether we are delaying or hastening the plot."""
         # TODO: need to validate this input at some point
         try:
             self.newTimeDelta = int(newTimeString)
+            if self.newTimeDelta > 0:
+                self.button.setText("OK (delayed)")
+            elif self.newTimeDelta < 0:
+                self.button.setText("OK (hastened)")
+            elif self.newTimeDelta == 0:
+                self.button.setText("OK")
         except:
             pass
 
