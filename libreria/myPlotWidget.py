@@ -146,7 +146,14 @@ class plotDirector(object):
 
     def updateTimeDelta(self):
         # TODO: implement this method: tell the curves to change the origin.
-        pass
+        if self.newTimeDelta != self.timeDelta:
+            for s_label in self.labels:
+                try:
+                    self.curves[s_label].updateTimeDelta(self.newTimeDelta)
+                    self.plots[s_label].redrawPlot()
+                except:
+                    pass
+            self.timeDelta = self.newTimeDelta
 
 class Curve(object):
     def __init__(self, *args, **kwargs):
@@ -156,16 +163,21 @@ class Curve(object):
         """
         self.data = kwargs.pop('data',[[],[]])
         self.label = kwargs.pop('label',None)
+        self.timeDelta = 0
 
     def __call__(self, x_array, *args, **kwargs):
         """kwargs is to accept legacy labels."""
-        return self.data[0]/1000., self.data[1]
+        return (self.data[0] + self.timeDelta)/1000., self.data[1]
 
     def loadData(self, data):
         """Parameters:
             data: Array [ x, y ] of all the points of the curve.
         """
         self.data = data
+        return self
+
+    def updateTimeDelta(self, time):
+        self.timeDelta = time
         return self
 
 # The Widget. This is production ready.
@@ -316,3 +328,12 @@ class myPlotWidget(pg.PlotWidget):
         """
         self.clear()
         self.label=newLabel
+
+    def redrawPlot(self):
+        """Force the plot to redraw."""
+        self.xMaxPlotted = self.xmin
+        # Clear the plot
+        self.plot(clear=True)
+        # Draw the vertical line, again
+        self.vertLine = self.thisPlotItem.addLine(self.curTime/1000.,movable=True)
+        self.updatePlot(self.xmax)
